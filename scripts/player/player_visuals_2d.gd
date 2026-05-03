@@ -57,12 +57,11 @@ var _impact_color := Color(1.0, 0.92, 0.5, 0.55)
 var _impact_position := Vector2.ZERO
 var _camera: CameraFollow2D = null
 var _crash_wobble := 0.0
+var _idle_time := 0.0
 
 func _process(_delta: float) -> void:
-	var charge := player.get_visual_charge_01() if player != null else 0.0
 	var spring_compression := player.get_spring_compression_01() if player != null else 0.0
-	var crouch := charge * crouch_amount
-	var compressed_spring_height := spring_height * (1.0 - charge * 0.28 - spring_compression * 0.55)
+	var compressed_spring_height := spring_height * (1.0 - spring_compression * 0.55)
 	compressed_spring_height = maxf(compressed_spring_height, spring_height * 0.35)
 	var left_shoe_position := _get_shoe_position(left_foot, compressed_spring_height)
 	var right_shoe_position := _get_shoe_position(right_foot, compressed_spring_height)
@@ -70,27 +69,42 @@ func _process(_delta: float) -> void:
 	global_position = body.global_position
 	rotation = body.rotation
 
-	body_sprite.position = Vector2(0.0, crouch)
-	body_sprite.scale = Vector2(1.0 + charge * 0.12, 1.0 - charge * 0.1)
-	head.position = Vector2(0.0, head_height + crouch * 0.35)
-	head.scale = Vector2(1.0 + charge * 0.04, 1.0 - charge * 0.04)
+	# Idle wobble — hahmo heiluu houkuttelevasti ennen ensimmäistä kosketusta
+	var idle_sway := 0.0
+	var idle_bob := 0.0
+	if player != null and player.is_waiting_for_tap():
+		_idle_time += _delta
+		idle_sway = sin(_idle_time * 2.2) * 5.0
+		idle_bob = sin(_idle_time * 4.0) * 2.5
+	else:
+		_idle_time = 0.0
+
+	body_sprite.position = Vector2(0.0, idle_bob)
+	body_sprite.scale = Vector2.ONE
+	body_sprite.rotation = deg_to_rad(idle_sway)
+	head.position = Vector2(0.0, head_height + idle_bob * 0.4)
+	head.scale = Vector2.ONE
+	head.rotation = deg_to_rad(idle_sway * 0.5)
 	if body_outline != null:
 		body_outline.position = body_sprite.position
 		body_outline.scale = body_sprite.scale
+		body_outline.rotation = body_sprite.rotation
 	if body_belly != null:
 		body_belly.position = body_sprite.position + Vector2(0.0, 2.0)
 		body_belly.scale = body_sprite.scale
+		body_belly.rotation = body_sprite.rotation
 	if head_outline != null:
 		head_outline.position = head.position
 		head_outline.scale = head.scale
+		head_outline.rotation = head.rotation
 
-	_update_leg(left_leg, left_shoe_position, Vector2(-leg_body_offset_x, leg_body_offset_y + crouch))
-	_update_leg(right_leg, right_shoe_position, Vector2(leg_body_offset_x, leg_body_offset_y + crouch))
+	_update_leg(left_leg, left_shoe_position, Vector2(-leg_body_offset_x, leg_body_offset_y))
+	_update_leg(right_leg, right_shoe_position, Vector2(leg_body_offset_x, leg_body_offset_y))
 	_update_foot(left_foot_sprite, left_foot, left_shoe_position)
 	_update_foot(right_foot_sprite, right_foot, right_shoe_position)
 	_update_spring(left_spring_sprite, left_shoe_position, left_foot.global_position)
 	_update_spring(right_spring_sprite, right_shoe_position, right_foot.global_position)
-	_update_face(charge)
+	_update_face(idle_sway)
 	_update_motion_trail(_delta)
 	_update_impact_ring(_delta)
 
@@ -149,25 +163,29 @@ func _update_spring(spring: Line2D, top_position: Vector2, bottom_position: Vect
 		var point := top_position + span * t + side * side_amount
 		spring.add_point(spring.to_local(point))
 
-func _update_face(charge: float) -> void:
+func _update_face(idle_sway: float) -> void:
 	if left_eye == null or right_eye == null or mouth == null or player == null:
 		return
 
 	var flying := not player.is_grounded_any()
 	var crashed := player.has_crashed()
+	var idle := player.is_waiting_for_tap()
 	var velocity := body.linear_velocity if body != null else Vector2.ZERO
 	var speed := velocity.length()
 	var wobble := clampf(absf(body.angular_velocity) / 12.0, 0.0, 1.0)
 
-	# Eyes track velocity direction
+	# Eyes track velocity in flight; look at camera during idle
 	var look_dir := Vector2.ZERO
-	if speed > 50.0 and not crashed:
+	if idle:
+		# Curious look toward camera — slight inward + down
+		look_dir = Vector2(sin(idle_sway * 0.05) * 1.5, 1.5)
+	elif speed > 50.0 and not crashed:
 		var local_vel := velocity.rotated(-body.rotation)
 		look_dir = local_vel.normalized() * 2.5
 
 	var eye_base_y := -6.0
 	var mouth_y := 7.0
-	var smile := 1.0 if flying else 0.2
+	var smile := 0.65 if idle else (1.0 if flying else 0.2)
 
 	if crashed:
 		_crash_wobble += 12.0 * get_process_delta_time()
@@ -175,28 +193,29 @@ func _update_face(charge: float) -> void:
 		look_dir = Vector2(dizzy_x, 2.0)
 		eye_base_y = -4.0
 		smile = -1.0
-	elif flying:
+	elif flying and not idle:
 		smile = 0.65 + wobble * 0.45
 		eye_base_y = -6.5
 
-	# Apply eye positions with look direction
 	left_eye.position = head.position + Vector2(-8.0 + look_dir.x, eye_base_y + look_dir.y * 0.5)
 	right_eye.position = head.position + Vector2(8.0 + look_dir.x, eye_base_y + look_dir.y * 0.5)
 
-	# Eye scale — excited when flying, squished X-eyes when crashed
 	if crashed:
 		left_eye.scale = Vector2(1.3, 0.35)
 		right_eye.scale = Vector2(1.3, 0.35)
+	elif idle:
+		# Gentle blink effect — eyes slightly taller when waiting
+		var blink := 1.0 + sin(_idle_time * 0.7) * 0.12
+		left_eye.scale = Vector2(1.0, blink)
+		right_eye.scale = left_eye.scale
 	else:
 		var excitement := 1.0 + (0.3 if flying else 0.0) + wobble * 0.15
 		left_eye.scale = Vector2(1.0 + wobble * 0.15, excitement)
 		right_eye.scale = left_eye.scale
 
-	# Mouth
-	mouth.position = head.position + Vector2(0.0, mouth_y + charge * 1.5)
+	mouth.position = head.position + Vector2(0.0, mouth_y)
 	mouth.clear_points()
 	if crashed:
-		# Wobbly frown
 		mouth.add_point(Vector2(-7.0, 2.0))
 		mouth.add_point(Vector2(-3.0, -2.0))
 		mouth.add_point(Vector2(3.0, 2.0))

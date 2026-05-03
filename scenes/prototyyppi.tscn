@@ -20,11 +20,7 @@ size = Vector2(30, 220)
 
 [sub_resource type="Resource" id="PlayerTuning_arcade"]
 script = ExtResource("4_tuning")
-max_launch_power = 1350.0
-min_launch_drag = 8.0
-launch_multiplier = 8.5
-grounded_launch_scale = 1.05
-partial_launch_scale = 0.8
+auto_launch_impulse = Vector2(520, -860)
 air_torque = 19500.0
 balance_torque = 6800.0
 max_angular_velocity = 20.5
@@ -41,7 +37,6 @@ crash_min_impact_speed = 80.0
 goal_upright_limit_degrees = 34.0
 goal_max_vertical_speed = 220.0
 goal_hold_time = 0.45
-visual_charge_distance = 230.0
 
 [sub_resource type="RectangleShape2D" id="GoalShape"]
 size = Vector2(120, 180)
@@ -197,7 +192,7 @@ color = Color(0.2, 0.74, 0.64, 1)
 polygon = PackedVector2Array(-310, -20, 310, -20, 310, 20, -310, 20)
 
 [node name="Platform1" type="StaticBody2D" parent="." unique_id=1834820322 groups=["ground"]]
-position = Vector2(670, 650)
+position = Vector2(840, 640)
 rotation = -0.18
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1" unique_id=68212111]
@@ -404,9 +399,10 @@ script = ExtResource("2_foot")
 shape = SubResource("FootShape")
 
 [node name="AimLine" type="Line2D" parent="Flaibai" unique_id=135241332]
+visible = false
 top_level = true
 width = 4.0
-default_color = Color(1, 0.86, 0.16, 1)
+default_color = Color(1, 0.86, 0.16, 0)
 
 [node name="VisualRoot" type="Node2D" parent="Flaibai" unique_id=292738453]
 position = Vector2(190, 641)
