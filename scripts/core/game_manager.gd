@@ -54,14 +54,46 @@ func _initialize() -> void:
 	retry_catcher = get_node_or_null(retry_catcher_path) as Control
 
 	if player == null:
-		push_error("GameManager could not find Flaibai/PlayerController2D.")
-		set_process(false)
-		return
+		# If player is missing (e.g. new Game.tscn architecture), load it
+		var player_scene = load("res://scenes/player/flaibai.tscn") as PackedScene
+		if player_scene != null:
+			player = player_scene.instantiate() as PlayerController2D
+			get_parent().call_deferred("add_child", player)
+		else:
+			push_error("GameManager could not find or load Flaibai/PlayerController2D.")
+			set_process(false)
+			return
+	
+	_load_current_level_scene()
 
+func _load_current_level_scene() -> void:
+	var level_container = get_parent().get_node_or_null("LevelContainer")
+	if level_container != null:
+		# Clear old level
+		for child in level_container.get_children():
+			child.queue_free()
+		# Load new level
+		var level_path = ProjectState.get_current_scene()
+		var level_scene = load(level_path) as PackedScene
+		if level_scene != null:
+			var level_instance = level_scene.instantiate()
+			level_container.add_child(level_instance)
+			# Find spawn point
+			spawn_point = level_instance.get_node_or_null("SpawnPoint")
+			if spawn_point == null:
+				spawn_point = level_instance.find_child("SpawnPoint", true, false)
+
+	_finish_initialization()
+
+func _finish_initialization() -> void:
 	_load_records()
-	player.crashed.connect(_on_player_crashed)
-	player.bounced.connect(_on_player_bounced)
-	player.surface_touched.connect(_on_player_surface_touched)
+	if not player.crashed.is_connected(_on_player_crashed):
+		player.crashed.connect(_on_player_crashed)
+	if not player.bounced.is_connected(_on_player_bounced):
+		player.bounced.connect(_on_player_bounced)
+	if not player.surface_touched.is_connected(_on_player_surface_touched):
+		player.surface_touched.connect(_on_player_surface_touched)
+
 	if retry_label != null:
 		retry_label.visible = false
 		if retry_label is Label:
@@ -74,9 +106,11 @@ func _initialize() -> void:
 		result_label.visible = false
 	if retry_catcher != null:
 		retry_catcher.visible = false
-		retry_catcher.gui_input.connect(_on_retry_catcher_gui_input)
+		if not retry_catcher.gui_input.is_connected(_on_retry_catcher_gui_input):
+			retry_catcher.gui_input.connect(_on_retry_catcher_gui_input)
 
 	_spawn_position = spawn_point.global_position if spawn_point != null else player.body.global_position
+	player.reset_to_spawn(_spawn_position)
 	_update_score_label()
 	_update_flow_label()
 	_initialized = true
