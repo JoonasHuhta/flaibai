@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Flaibai"
-run/main_scene="res://scenes/prototyyppi.tscn"
+run/main_scene="res://scenes/levels/level_01.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
+
+[autoload]
+
+ProjectState="*res://scripts/core/project_state.gd"
 
 [display]
 

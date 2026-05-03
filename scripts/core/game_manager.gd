@@ -82,14 +82,26 @@ func _initialize() -> void:
 	_initialized = true
 
 func _input(event: InputEvent) -> void:
-	if _is_retry_event(event):
+	if not (failed or level_completed):
+		return
+	if not _is_tap_event(event):
+		return
+	if level_completed:
+		_load_next_level()
+	else:
 		respawn()
-		get_viewport().set_input_as_handled()
+	get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _is_retry_event(event):
+	if not (failed or level_completed):
+		return
+	if not _is_tap_event(event):
+		return
+	if level_completed:
+		_load_next_level()
+	else:
 		respawn()
-		get_viewport().set_input_as_handled()
+	get_viewport().set_input_as_handled()
 
 func _process(_delta: float) -> void:
 	if not _initialized:
@@ -283,23 +295,27 @@ func _update_flow_label() -> void:
 
 	flow_label.text = "Flow %d%%" % int(round(flow))
 
-func _is_retry_event(event: InputEvent) -> bool:
-	if not failed and not level_completed:
-		return false
-
+func _is_tap_event(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
 		return event.button_index == MOUSE_BUTTON_LEFT and event.pressed
 	if event is InputEventScreenTouch:
 		return event.pressed
 	if event is InputEventKey:
 		return event.pressed and event.keycode == KEY_R
-
 	return false
 
+func _load_next_level() -> void:
+	ProjectState.advance_level()
+	get_tree().change_scene_to_file(ProjectState.get_current_scene())
+
 func _on_retry_catcher_gui_input(event: InputEvent) -> void:
-	if _is_retry_event(event):
+	if not _is_tap_event(event):
+		return
+	if level_completed:
+		_load_next_level()
+	else:
 		respawn()
-		get_viewport().set_input_as_handled()
+	get_viewport().set_input_as_handled()
 
 func _format_time(seconds: float) -> String:
 	var clamped_seconds := maxf(seconds, 0.0)
