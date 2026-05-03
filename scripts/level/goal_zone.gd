@@ -1,4 +1,4 @@
-﻿extends Area2D
+extends Area2D
 class_name GoalZone
 
 enum State {
@@ -49,7 +49,11 @@ func _process(delta: float) -> void:
 
 		if _hold_timer >= tuning.goal_hold_time:
 			current_state = State.COMPLETE
-			game_manager.complete_level()
+			player.celebrate()
+			# Small delay so the joy-jump animation plays before UI appears
+			get_tree().create_timer(0.9).timeout.connect(func():
+				game_manager.complete_level()
+			)
 	else:
 		_hold_timer = 0.0
 		current_state = State.WAITING

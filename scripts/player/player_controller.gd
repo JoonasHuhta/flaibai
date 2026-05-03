@@ -211,6 +211,21 @@ func fail() -> void:
 	request_camera_shake.emit(4.0, 0.25)
 	crashed.emit()
 
+func celebrate() -> void:
+	## Joyful jump when level is completed — Flaibai hops and spins!
+	set_controls_enabled(false)
+	_waiting_for_tap = false
+	body.linear_velocity = Vector2(body.linear_velocity.x * 0.3, 0.0)
+	body.angular_velocity = 0.0
+	# Three quick happy hops via timed impulses
+	body.apply_central_impulse(Vector2(0.0, -680.0))
+	get_tree().create_timer(0.55).timeout.connect(func():
+		if body != null and not body.freeze:
+			body.apply_central_impulse(Vector2(0.0, -520.0))
+			body.angular_velocity = 8.0
+	)
+	Input.vibrate_handheld(40)
+
 # --- Input handling ---
 
 func _handle_pointer_input(event: InputEvent) -> void:

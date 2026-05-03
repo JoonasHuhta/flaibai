@@ -73,11 +73,11 @@ mouse_filter = 0
 [node name="TapToRetry" type="Label" parent="RetryLayer"]
 visible = false
 offset_left = 42.0
-offset_top = 352.0
+offset_top = 660.0
 offset_right = 348.0
-offset_bottom = 424.0
-theme_override_font_sizes/font_size = 28
-text = "Tap to try again"
+offset_bottom = 720.0
+theme_override_font_sizes/font_size = 26
+text = "▶  Next Level"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -111,13 +111,13 @@ horizontal_alignment = 2
 
 [node name="ResultLabel" type="Label" parent="RetryLayer"]
 visible = false
-offset_left = 38.0
-offset_top = 238.0
-offset_right = 352.0
-offset_bottom = 386.0
-theme_override_colors/font_color = Color(1, 0.95, 0.75, 1)
-theme_override_font_sizes/font_size = 25
-text = "FLAIBAI\nNew personal best\nTime 00.00\nClean streak 0\nBounces 0"
+offset_left = 30.0
+offset_top = 200.0
+offset_right = 360.0
+offset_bottom = 650.0
+theme_override_colors/font_color = Color(1, 0.97, 0.85, 1)
+theme_override_font_sizes/font_size = 26
+text = "KENTTÄ LÄPÄISTY!"
 horizontal_alignment = 1
 vertical_alignment = 1
 

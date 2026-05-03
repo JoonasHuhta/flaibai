@@ -156,31 +156,38 @@ func complete_level() -> void:
 		return
 
 	level_completed = true
-	best_score = max(best_score, run_score + 500)
-	run_score += 500
-	flow = 100.0
 	var previous_best_time := best_time
 	var new_best := best_time < 0.0 or run_time < best_time
 	if new_best:
 		best_time = run_time
 	best_clean_streak = maxi(best_clean_streak, clean_streak)
+	best_score = max(best_score, run_score + 500)
+	run_score += 500
+	flow = 100.0
 	_save_records()
 	_update_score_label()
 	_update_flow_label()
-	if feedback_label != null:
-		feedback_label.text = "Trail complete"
-		feedback_label.visible = true
-		_feedback_timer = 2.0
+
+	# Build the result card text
+	var time_line := "⏱  %s" % _format_time(run_time)
+	var best_line := "🏆 New best!" if new_best else ("Best: %s" % _format_time(previous_best_time if previous_best_time >= 0.0 else run_time))
+	var clean_line := "✨ Clean landings: %d" % clean_streak
+	var score_line := "Score: %d" % run_score
+
 	if result_label != null:
-		result_label.text = _format_result_text(new_best, previous_best_time)
+		result_label.text = "KENTTÄ LÄPÄISTY!\n\n%s\n%s\n%s\n%s" % [time_line, best_line, clean_line, score_line]
 		result_label.visible = true
+	if feedback_label != null:
+		feedback_label.text = "🎉 Great run!"
+		feedback_label.visible = true
+		_feedback_timer = 1.5
 	if retry_label != null:
 		retry_label.visible = true
 		if retry_label is Label:
-			(retry_label as Label).text = "Tap for another run"
+			(retry_label as Label).text = "▶  Next Level"
 	if retry_catcher != null:
 		retry_catcher.visible = true
-	print("LEVEL COMPLETE")
+	print("LEVEL COMPLETE — time: ", _format_time(run_time), " clean: ", clean_streak)
 
 func _on_player_crashed() -> void:
 	_fail_run()
