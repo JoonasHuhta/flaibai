@@ -1,0 +1,515 @@
+[gd_scene format=3 uid="uid://dwx2w2bgwgpl6"]
+
+[ext_resource type="Script" uid="uid://yjt34ardfgmp" path="res://scripts/player/player_controller.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://3bo1k8rjhpty" path="res://scripts/player/foot_contact_2d.gd" id="2_foot"]
+[ext_resource type="Script" uid="uid://d333fs55of5k" path="res://scripts/player/player_visuals_2d.gd" id="3_visuals"]
+[ext_resource type="Script" uid="uid://fiq6p1g26syf" path="res://scripts/player/player_tuning.gd" id="4_tuning"]
+[ext_resource type="Script" uid="uid://bg66qs02iuaf1" path="res://scripts/core/camera_follow_2d.gd" id="5_camera"]
+[ext_resource type="Script" uid="uid://dm0h2uchlsaog" path="res://scripts/core/game_manager.gd" id="6_game"]
+[ext_resource type="Script" uid="uid://mneirhejbpr3" path="res://scripts/level/goal_zone.gd" id="7_goal"]
+
+
+[sub_resource type="RectangleShape2D" id="GroundShape"]
+size = Vector2(620, 40)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape"]
+size = Vector2(230, 28)
+
+[sub_resource type="RectangleShape2D" id="WallShape"]
+size = Vector2(30, 220)
+
+[sub_resource type="Resource" id="PlayerTuning_arcade"]
+script = ExtResource("4_tuning")
+max_launch_power = 1350.0
+min_launch_drag = 8.0
+launch_multiplier = 8.5
+grounded_launch_scale = 1.05
+partial_launch_scale = 0.8
+air_torque = 19500.0
+balance_torque = 6800.0
+max_angular_velocity = 20.5
+input_balance_relief = 0.03
+bounce_impulse = Vector2(260, -260)
+tilt_bounce_impulse = 650.0
+bounce_takeoff_speed = 980.0
+max_bounce_takeoff_speed = 1280.0
+upright_limit_degrees = 58.0
+min_bounce_impact_speed = 85.0
+bounce_cooldown = 0.12
+spring_visual_compression_time = 0.16
+crash_min_impact_speed = 80.0
+goal_upright_limit_degrees = 34.0
+goal_max_vertical_speed = 220.0
+goal_hold_time = 0.45
+visual_charge_distance = 230.0
+
+[sub_resource type="RectangleShape2D" id="GoalShape"]
+size = Vector2(120, 180)
+
+[sub_resource type="CircleShape2D" id="BodyShape"]
+radius = 26.0
+
+[sub_resource type="CircleShape2D" id="FootShape"]
+radius = 11.0
+
+[node name="FlaibaiPrototype" type="Node2D" unique_id=1169460522]
+
+[node name="GameManager" type="Node" parent="." unique_id=1072466905]
+script = ExtResource("6_game")
+retry_label_path = NodePath("../RetryLayer/TapToRetry")
+feedback_label_path = NodePath("../RetryLayer/LandingFeedback")
+score_label_path = NodePath("../RetryLayer/ScoreLabel")
+flow_label_path = NodePath("../RetryLayer/FlowLabel")
+controls_hint_path = NodePath("../RetryLayer/ControlsHint")
+result_label_path = NodePath("../RetryLayer/ResultLabel")
+retry_catcher_path = NodePath("../RetryLayer/RetryCatcher")
+
+[node name="RetryLayer" type="CanvasLayer" parent="."]
+
+
+[node name="RetryCatcher" type="Control" parent="RetryLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+
+[node name="TapToRetry" type="Label" parent="RetryLayer"]
+visible = false
+offset_left = 42.0
+offset_top = 352.0
+offset_right = 348.0
+offset_bottom = 424.0
+theme_override_font_sizes/font_size = 28
+text = "Tap to try again"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LandingFeedback" type="Label" parent="RetryLayer"]
+visible = false
+offset_left = 42.0
+offset_top = 110.0
+offset_right = 348.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 24
+text = "Clean landing"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="RetryLayer"]
+offset_left = 16.0
+offset_top = 18.0
+offset_right = 184.0
+offset_bottom = 96.0
+theme_override_font_sizes/font_size = 18
+text = "Time 00.00\nBest --.--\nClean x0"
+
+[node name="FlowLabel" type="Label" parent="RetryLayer"]
+offset_left = 230.0
+offset_top = 18.0
+offset_right = 374.0
+offset_bottom = 48.0
+theme_override_font_sizes/font_size = 18
+text = "Flow 0%"
+horizontal_alignment = 2
+
+[node name="ResultLabel" type="Label" parent="RetryLayer"]
+visible = false
+offset_left = 38.0
+offset_top = 238.0
+offset_right = 352.0
+offset_bottom = 386.0
+theme_override_colors/font_color = Color(1, 0.95, 0.75, 1)
+theme_override_font_sizes/font_size = 25
+text = "FLAIBAI\nNew personal best\nTime 00.00\nClean streak 0\nBounces 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ControlsHint" type="Label" parent="RetryLayer"]
+offset_left = 28.0
+offset_top = 760.0
+offset_right = 362.0
+offset_bottom = 828.0
+theme_override_font_sizes/font_size = 17
+text = "Drag to launch\nHold left/right side to rotate"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SkyPanel" type="Polygon2D" parent="."]
+z_index = -30
+color = Color(0.33, 0.55, 0.78, 1)
+polygon = PackedVector2Array(-600, -300, 7000, -300, 7000, 900, -600, 900)
+
+[node name="Sun" type="Polygon2D" parent="."]
+z_index = -25
+position = Vector2(310, 170)
+color = Color(1, 0.82, 0.28, 0.8)
+polygon = PackedVector2Array(0, -42, 24, -32, 39, -12, 39, 13, 24, 33, 0, 42, -24, 33, -39, 13, -39, -12, -24, -32)
+
+[node name="Cloud1" type="Polygon2D" parent="."]
+z_index = -24
+position = Vector2(760, 230)
+color = Color(1, 1, 1, 0.35)
+polygon = PackedVector2Array(-70, 16, -48, -10, -20, -14, -4, -36, 34, -28, 50, -8, 76, 0, 70, 20, -70, 20)
+
+[node name="Cloud2" type="Polygon2D" parent="."]
+z_index = -24
+position = Vector2(2050, 190)
+color = Color(1, 1, 1, 0.28)
+polygon = PackedVector2Array(-88, 14, -58, -14, -25, -10, -7, -34, 32, -31, 57, -8, 91, -2, 82, 18, -88, 18)
+
+[node name="Cloud3" type="Polygon2D" parent="."]
+z_index = -24
+position = Vector2(3520, 240)
+color = Color(1, 1, 1, 0.3)
+polygon = PackedVector2Array(-78, 15, -52, -10, -22, -13, -5, -32, 31, -24, 52, -6, 78, 1, 68, 19, -78, 19)
+
+[node name="Cloud4" type="Polygon2D" parent="."]
+z_index = -24
+position = Vector2(5200, 210)
+color = Color(1, 1, 1, 0.26)
+polygon = PackedVector2Array(-96, 14, -64, -16, -28, -12, -9, -36, 35, -30, 62, -8, 98, -2, 88, 18, -96, 18)
+
+[node name="SpawnPoint" type="Marker2D" parent="." unique_id=1807260169]
+position = Vector2(190, 641)
+
+[node name="StartBrand" type="Label" parent="."]
+z_index = -10
+modulate = Color(1, 0.89, 0.4, 0.18)
+offset_left = -18.0
+offset_top = 260.0
+offset_right = 480.0
+offset_bottom = 350.0
+theme_override_font_sizes/font_size = 66
+text = "FLAIBAI"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Ground" type="StaticBody2D" parent="." unique_id=2111817265 groups=["ground"]]
+position = Vector2(260, 740)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=794233261]
+shape = SubResource("GroundShape")
+
+[node name="Visual" type="Polygon2D" parent="Ground" unique_id=1591093044]
+color = Color(0.2, 0.74, 0.64, 1)
+polygon = PackedVector2Array(-310, -20, 310, -20, 310, 20, -310, 20)
+
+[node name="Platform1" type="StaticBody2D" parent="." unique_id=1834820322 groups=["ground"]]
+position = Vector2(670, 650)
+rotation = -0.18
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1" unique_id=68212111]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform1" unique_id=1631616273]
+color = Color(0.34, 0.76, 0.4, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform2" type="StaticBody2D" parent="." unique_id=1607345317 groups=["ground", "mushroom"]]
+position = Vector2(980, 570)
+rotation = 0.14
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2" unique_id=762527127]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform2" unique_id=2026663402]
+color = Color(1, 0.32, 0.34, 1)
+polygon = PackedVector2Array(-115, -8, -92, -28, -40, -34, 0, -26, 40, -34, 92, -28, 115, -8, 105, 14, -105, 14)
+
+[node name="WallKick" type="StaticBody2D" parent="." unique_id=1153933115 groups=["ground"]]
+position = Vector2(1240, 530)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallKick" unique_id=738698264]
+shape = SubResource("WallShape")
+
+[node name="Visual" type="Polygon2D" parent="WallKick" unique_id=1097298840]
+color = Color(0.22, 0.48, 0.88, 1)
+polygon = PackedVector2Array(-15, -110, 15, -110, 15, 110, -15, 110)
+
+[node name="Platform3" type="StaticBody2D" parent="." unique_id=815807466 groups=["ground", "moss"]]
+position = Vector2(1470, 640)
+rotation = -0.1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform3" unique_id=1411425123]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform3" unique_id=1211224500]
+color = Color(0.25, 0.62, 0.32, 1)
+polygon = PackedVector2Array(-115, -10, -94, -19, -70, -10, -44, -20, -12, -9, 18, -19, 48, -9, 76, -18, 115, -10, 115, 14, -115, 14)
+
+[node name="Platform4" type="StaticBody2D" parent="." groups=["ground", "ice"]]
+position = Vector2(1870, 590)
+rotation = 0.12
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform4"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform4"]
+color = Color(0.62, 0.9, 1, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform5" type="StaticBody2D" parent="." groups=["ground"]]
+position = Vector2(2180, 675)
+rotation = -0.1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform5"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform5"]
+color = Color(0.34, 0.76, 0.4, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform6" type="StaticBody2D" parent="." groups=["ground"]]
+position = Vector2(2520, 600)
+rotation = 0.08
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform6"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform6"]
+color = Color(0.34, 0.76, 0.4, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform7" type="StaticBody2D" parent="." groups=["ground"]]
+position = Vector2(2920, 640)
+rotation = -0.16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform7"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform7"]
+color = Color(0.34, 0.76, 0.4, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform8" type="StaticBody2D" parent="." groups=["ground", "ice"]]
+position = Vector2(3330, 560)
+rotation = 0.2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform8"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform8"]
+color = Color(0.62, 0.9, 1, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform9" type="StaticBody2D" parent="." groups=["ground"]]
+position = Vector2(3720, 690)
+rotation = -0.22
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform9"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform9"]
+color = Color(0.34, 0.76, 0.4, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform10" type="StaticBody2D" parent="." groups=["ground"]]
+position = Vector2(4140, 600)
+rotation = 0.05
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform10"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform10"]
+color = Color(0.34, 0.76, 0.4, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform11" type="StaticBody2D" parent="." groups=["ground", "mushroom"]]
+position = Vector2(4580, 610)
+rotation = -0.08
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform11"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform11"]
+color = Color(1, 0.32, 0.34, 1)
+polygon = PackedVector2Array(-115, -8, -92, -28, -40, -34, 0, -26, 40, -34, 92, -28, 115, -8, 105, 14, -105, 14)
+
+[node name="Platform12" type="StaticBody2D" parent="." groups=["ground"]]
+position = Vector2(5000, 500)
+rotation = 0.14
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform12"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform12"]
+color = Color(0.34, 0.76, 0.4, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="Platform13" type="StaticBody2D" parent="." groups=["ground", "moss"]]
+position = Vector2(5430, 660)
+rotation = -0.18
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform13"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform13"]
+color = Color(0.25, 0.62, 0.32, 1)
+polygon = PackedVector2Array(-115, -10, -94, -19, -70, -10, -44, -20, -12, -9, 18, -19, 48, -9, 76, -18, 115, -10, 115, 14, -115, 14)
+
+[node name="Platform14" type="StaticBody2D" parent="." groups=["ground", "ice"]]
+position = Vector2(5850, 590)
+rotation = 0.12
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform14"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platform14"]
+color = Color(0.62, 0.9, 1, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
+[node name="GoalZone" type="Area2D" parent="." unique_id=1091897052]
+position = Vector2(6280, 535)
+script = ExtResource("7_goal")
+tuning = SubResource("PlayerTuning_arcade")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone" unique_id=1090072342]
+shape = SubResource("GoalShape")
+debug_color = Color(1, 0.9, 0.1, 0.35)
+
+[node name="Visual" type="Polygon2D" parent="GoalZone" unique_id=1906654010]
+color = Color(1, 0.85, 0.18, 0.28)
+polygon = PackedVector2Array(-60, -90, 60, -90, 60, 90, -60, 90)
+
+[node name="Flaibai" type="Node2D" parent="." unique_id=1242706165 groups=["player"]]
+z_index = 20
+script = ExtResource("1_player")
+tuning = SubResource("PlayerTuning_arcade")
+
+[node name="Body" type="RigidBody2D" parent="Flaibai" unique_id=2121957030]
+position = Vector2(190, 641)
+mass = 1.6
+gravity_scale = 3.0
+continuous_cd = 1
+linear_damp = 0.2
+angular_damp = 7.5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flaibai/Body" unique_id=254106145]
+shape = SubResource("BodyShape")
+
+[node name="LeftFoot" type="Area2D" parent="Flaibai" unique_id=710404558]
+position = Vector2(173, 711)
+script = ExtResource("2_foot")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flaibai/LeftFoot" unique_id=1328153733]
+shape = SubResource("FootShape")
+
+[node name="RightFoot" type="Area2D" parent="Flaibai" unique_id=1600669617]
+position = Vector2(207, 711)
+script = ExtResource("2_foot")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flaibai/RightFoot" unique_id=657330212]
+shape = SubResource("FootShape")
+
+[node name="AimLine" type="Line2D" parent="Flaibai" unique_id=135241332]
+top_level = true
+width = 4.0
+default_color = Color(1, 0.86, 0.16, 1)
+
+[node name="VisualRoot" type="Node2D" parent="Flaibai" unique_id=292738453]
+position = Vector2(190, 641)
+z_index = 20
+script = ExtResource("3_visuals")
+head_height = -42.0
+leg_body_offset_y = 8.0
+leg_body_offset_x = 14.0
+crouch_amount = 13.0
+spring_height = 26.0
+spring_width = 14.0
+
+[node name="MotionTrail" type="Line2D" parent="Flaibai/VisualRoot"]
+top_level = true
+z_index = -4
+width = 8.0
+default_color = Color(1, 0.92, 0.5, 0.35)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="ImpactRing" type="Line2D" parent="Flaibai/VisualRoot"]
+visible = false
+top_level = true
+z_index = 4
+width = 3.0
+default_color = Color(1, 0.92, 0.5, 0.45)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="BodyOutline" type="Polygon2D" parent="Flaibai/VisualRoot"]
+color = Color(0.04, 0.05, 0.12, 1)
+polygon = PackedVector2Array(-24, -20, -16, -28, 16, -28, 24, -20, 24, 20, 16, 28, -16, 28, -24, 20)
+
+[node name="BodySprite" type="Polygon2D" parent="Flaibai/VisualRoot" unique_id=285621593]
+color = Color(0.18, 0.38, 1, 1)
+polygon = PackedVector2Array(-21, -17, -14, -24, 14, -24, 21, -17, 21, 17, 14, 24, -14, 24, -21, 17)
+
+[node name="BodyBelly" type="Polygon2D" parent="Flaibai/VisualRoot"]
+color = Color(0.27, 0.72, 1, 1)
+polygon = PackedVector2Array(-12, -8, 12, -8, 12, 18, -12, 18)
+
+[node name="HeadOutline" type="Polygon2D" parent="Flaibai/VisualRoot"]
+color = Color(0.04, 0.05, 0.12, 1)
+polygon = PackedVector2Array(-20, -11, -14, -22, 0, -26, 15, -22, 22, -11, 22, 10, 15, 21, 0, 25, -15, 21, -22, 10)
+
+[node name="Head" type="Polygon2D" parent="Flaibai/VisualRoot" unique_id=489978975]
+color = Color(1, 0.73, 0.26, 1)
+polygon = PackedVector2Array(-17, -9, -11, -19, 0, -22, 12, -19, 18, -9, 18, 9, 12, 18, 0, 22, -12, 18, -18, 9)
+
+[node name="LeftEye" type="Polygon2D" parent="Flaibai/VisualRoot"]
+z_index = 2
+color = Color(0.04, 0.05, 0.12, 1)
+polygon = PackedVector2Array(-3, -4, 3, -4, 4, 0, 3, 4, -3, 4, -4, 0)
+
+[node name="RightEye" type="Polygon2D" parent="Flaibai/VisualRoot"]
+z_index = 2
+color = Color(0.04, 0.05, 0.12, 1)
+polygon = PackedVector2Array(-3, -4, 3, -4, 4, 0, 3, 4, -3, 4, -4, 0)
+
+[node name="Mouth" type="Line2D" parent="Flaibai/VisualRoot"]
+z_index = 2
+width = 3.0
+default_color = Color(0.04, 0.05, 0.12, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="LeftLeg" type="Polygon2D" parent="Flaibai/VisualRoot" unique_id=1430936330]
+color = Color(0.09, 0.17, 0.58, 1)
+polygon = PackedVector2Array(-29, -5, 29, -5, 29, 5, -29, 5)
+
+[node name="RightLeg" type="Polygon2D" parent="Flaibai/VisualRoot" unique_id=163961066]
+color = Color(0.09, 0.17, 0.58, 1)
+polygon = PackedVector2Array(-29, -5, 29, -5, 29, 5, -29, 5)
+
+[node name="LeftShoeSpring" type="Line2D" parent="Flaibai/VisualRoot" unique_id=1898772055]
+width = 4.5
+default_color = Color(1, 0.92, 0.62, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RightShoeSpring" type="Line2D" parent="Flaibai/VisualRoot" unique_id=442724899]
+width = 4.5
+default_color = Color(1, 0.92, 0.62, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="LeftFootSprite" type="Polygon2D" parent="Flaibai/VisualRoot" unique_id=1035759798]
+color = Color(0.06, 0.07, 0.1, 1)
+polygon = PackedVector2Array(-19, -7, 13, -7, 19, 0, 14, 8, -17, 8, -21, 2)
+
+[node name="RightFootSprite" type="Polygon2D" parent="Flaibai/VisualRoot" unique_id=103449006]
+color = Color(0.06, 0.07, 0.1, 1)
+polygon = PackedVector2Array(-13, -7, 19, -7, 21, 2, 17, 8, -14, 8, -19, 0)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1083425965]
+position = Vector2(195, 330)
+script = ExtResource("5_camera")
+target_path = NodePath("../Flaibai/Body")
+max_x = 6480.0
+min_y = 260.0
+max_y = 620.0
