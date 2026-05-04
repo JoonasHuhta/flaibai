@@ -26,10 +26,6 @@ func shake(intensity: float, duration: float = 0.2) -> void:
 
 func _process(delta: float) -> void:
 	if target == null:
-		var player := get_tree().get_first_node_in_group("player") as Node2D
-		if player != null and player.has_node("Body"):
-			target = player.get_node("Body")
-	if target == null:
 		return
 
 	var velocity_x := 0.0
