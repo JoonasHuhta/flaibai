@@ -53,17 +53,59 @@ polygon = PackedVector2Array(-2, -2, 2, -2, 2, 2, -2, 2)
 
 [node name="FlaibaiAnchor" type="Node2D" parent="."]
 position = Vector2(195, 500)
+scale = Vector2(0.95, 0.95)
+
+[node name="FlaibaiBodyOutline" type="Polygon2D" parent="FlaibaiAnchor"]
+z_index = 4
+color = Color(0.04, 0.05, 0.12, 1)
+polygon = PackedVector2Array(-24, -20, -16, -28, 16, -28, 24, -20, 24, 20, 16, 28, -16, 28, -24, 20)
 
 [node name="FlaibaiBody" type="Polygon2D" parent="FlaibaiAnchor"]
 z_index = 5
-color = Color(0.18, 0.38, 1, 1)
+color = Color(0.16, 0.34, 0.96, 1)
 polygon = PackedVector2Array(-21, -17, -14, -24, 14, -24, 21, -17, 21, 17, 14, 24, -14, 24, -21, 17)
+
+[node name="FlaibaiBelly" type="Polygon2D" parent="FlaibaiAnchor"]
+z_index = 6
+position = Vector2(0, 2)
+color = Color(0.35, 0.76, 1, 1)
+polygon = PackedVector2Array(-12, -8, 12, -8, 12, 18, -12, 18)
+
+[node name="FlaibaiHeadOutline" type="Polygon2D" parent="FlaibaiAnchor"]
+z_index = 6
+position = Vector2(0, -43)
+color = Color(0.04, 0.05, 0.12, 1)
+polygon = PackedVector2Array(-20, -11, -14, -22, 0, -26, 15, -22, 22, -11, 22, 10, 15, 21, 0, 25, -15, 21, -22, 10)
 
 [node name="FlaibaiHead" type="Polygon2D" parent="FlaibaiAnchor"]
 z_index = 6
 position = Vector2(0, -43)
-color = Color(1, 0.73, 0.26, 1)
+color = Color(1, 0.74, 0.28, 1)
 polygon = PackedVector2Array(-17, -9, -11, -19, 0, -22, 12, -19, 18, -9, 18, 9, 12, 18, 0, 22, -12, 18, -18, 9)
+
+[node name="FlaibaiCap" type="Polygon2D" parent="FlaibaiAnchor"]
+z_index = 9
+position = Vector2(0, -43)
+color = Color(0.93, 0.18, 0.22, 1)
+polygon = PackedVector2Array(-16, -10, 16, -10, 26, -10, 26, -14, 14, -14, 10, -26, -12, -26, -18, -18)
+
+[node name="FlaibaiCapOutline" type="Line2D" parent="FlaibaiAnchor/FlaibaiCap"]
+points = PackedVector2Array(-16, -10, 16, -10, 26, -10, 26, -14, 14, -14, 10, -26, -12, -26, -18, -18)
+closed = true
+width = 3.0
+default_color = Color(0.04, 0.05, 0.12, 1)
+
+[node name="FlaibaiCheekL" type="Polygon2D" parent="FlaibaiAnchor"]
+z_index = 7
+position = Vector2(-10, -35)
+color = Color(1, 0.48, 0.34, 0.5)
+polygon = PackedVector2Array(-4, -2, 4, -2, 5, 0, 4, 2, -4, 2, -5, 0)
+
+[node name="FlaibaiCheekR" type="Polygon2D" parent="FlaibaiAnchor"]
+z_index = 7
+position = Vector2(11, -35)
+color = Color(1, 0.48, 0.34, 0.5)
+polygon = PackedVector2Array(-4, -2, 4, -2, 5, 0, 4, 2, -4, 2, -5, 0)
 
 [node name="FlaibaiEyeL" type="Polygon2D" parent="FlaibaiAnchor"]
 z_index = 7
@@ -87,13 +129,29 @@ begin_cap_mode = 2
 end_cap_mode = 2
 points = PackedVector2Array(-8, 0, 0, 5.5, 8, 0)
 
+[node name="LegL" type="Polygon2D" parent="FlaibaiAnchor"]
+z_index = 4
+position = Vector2(-12, 25)
+rotation = 0.18
+color = Color(0.09, 0.17, 0.58, 1)
+polygon = PackedVector2Array(-5, -22, 5, -22, 5, 22, -5, 22)
+
+[node name="LegR" type="Polygon2D" parent="FlaibaiAnchor"]
+z_index = 4
+position = Vector2(12, 25)
+rotation = -0.18
+color = Color(0.09, 0.17, 0.58, 1)
+polygon = PackedVector2Array(-5, -22, 5, -22, 5, 22, -5, 22)
+
 [node name="SpringL" type="Line2D" parent="FlaibaiAnchor"]
 z_index = 4
 position = Vector2(-14, 18)
 width = 4.0
 default_color = Color(1, 0.92, 0.62, 1)
 joint_mode = 2
-points = PackedVector2Array(0, 0, -2, 10, 2, 20, -2, 30, 0, 40)
+begin_cap_mode = 2
+end_cap_mode = 2
+points = PackedVector2Array(0, 0, -5, 6, 5, 12, -5, 18, 5, 24, -5, 30, 5, 36, 0, 42)
 
 [node name="SpringR" type="Line2D" parent="FlaibaiAnchor"]
 z_index = 4
@@ -101,7 +159,9 @@ position = Vector2(14, 18)
 width = 4.0
 default_color = Color(1, 0.92, 0.62, 1)
 joint_mode = 2
-points = PackedVector2Array(0, 0, 2, 10, -2, 20, 2, 30, 0, 40)
+begin_cap_mode = 2
+end_cap_mode = 2
+points = PackedVector2Array(0, 0, 5, 6, -5, 12, 5, 18, -5, 24, 5, 30, -5, 36, 0, 42)
 
 [node name="ShoeL" type="Polygon2D" parent="FlaibaiAnchor"]
 z_index = 4
