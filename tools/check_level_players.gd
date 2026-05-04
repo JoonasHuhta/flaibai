@@ -4,6 +4,7 @@ const SCENES := [
 	"res://scenes/levels/level_01.tscn",
 	"res://scenes/levels/level_02.tscn",
 	"res://scenes/levels/level_03.tscn",
+	"res://scenes/levels/level_04.tscn",
 	"res://scenes/prototyyppi.tscn",
 ]
 const PLAYER_RIG := "res://scenes/player/player_rig.tscn"

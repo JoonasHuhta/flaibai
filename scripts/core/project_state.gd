@@ -10,13 +10,18 @@ const LEVEL_CATALOG: Array[Dictionary] = [
 	},
 	{
 		"scene": "res://scenes/levels/level_02.tscn",
-		"name": "Long Hop",
-		"concept": "Longer air control and forgiving recovery",
+		"name": "Soft Step",
+		"concept": "Safe moss recovery and short controlled hops",
 	},
 	{
 		"scene": "res://scenes/levels/level_03.tscn",
 		"name": "Flow Ridge",
 		"concept": "Mixed surfaces and rhythm",
+	},
+	{
+		"scene": "res://scenes/levels/level_04.tscn",
+		"name": "Long Hop",
+		"concept": "Longer air control, ice, moss and late-game recovery",
 	},
 ]
 
