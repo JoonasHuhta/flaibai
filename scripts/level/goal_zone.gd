@@ -24,6 +24,9 @@ enum State {
 @export var sweep_extra_height: float = 90.0
 @export var progress_path: NodePath = ^"ProgressFill"
 @export var glow_path: NodePath = ^"GlowZone"
+@export var landing_pad_path: NodePath = ^"LandingPad"
+@export var flag_gold_path: NodePath = ^"FlagGold"
+@export var flag_dark_path: NodePath = ^"FlagDark"
 
 var current_state: State = State.WAITING
 
@@ -31,6 +34,9 @@ var player: PlayerController2D
 var game_manager: GameManager
 var progress_fill: Node2D
 var glow_zone: CanvasItem
+var landing_pad: CanvasItem
+var flag_gold: CanvasItem
+var flag_dark: CanvasItem
 
 var _hold_timer := 0.0
 var _player_inside := false
@@ -40,6 +46,8 @@ var _last_body_position := Vector2.INF
 var _last_left_foot_position := Vector2.INF
 var _last_right_foot_position := Vector2.INF
 var _last_head_position := Vector2.INF
+var _activation_pulse := 0.0
+var _was_goal_active := false
 
 func _ready() -> void:
 	player = _resolve_player()
@@ -49,6 +57,9 @@ func _ready() -> void:
 		tuning = PlayerTuning.new()
 	progress_fill = get_node_or_null(progress_path) as Node2D
 	glow_zone = get_node_or_null(glow_path) as CanvasItem
+	landing_pad = get_node_or_null(landing_pad_path) as CanvasItem
+	flag_gold = get_node_or_null(flag_gold_path) as CanvasItem
+	flag_dark = get_node_or_null(flag_dark_path) as CanvasItem
 	_update_goal_feedback()
 
 	if player == null:
@@ -75,8 +86,14 @@ func _process(delta: float) -> void:
 	var finish_contact := currently_inside or swept_inside
 	if finish_contact:
 		_inside_grace_timer = contact_grace_time
+		if not _was_goal_active:
+			_activation_pulse = 1.0
+		_was_goal_active = true
 	else:
 		_inside_grace_timer = maxf(_inside_grace_timer - delta, 0.0)
+		if _inside_grace_timer <= 0.0:
+			_was_goal_active = false
+	_activation_pulse = maxf(_activation_pulse - delta * 3.8, 0.0)
 
 	if _inside_grace_timer <= 0.0:
 		_hold_timer = maxf(_hold_timer - delta * 2.0, 0.0)
@@ -237,12 +254,31 @@ func _update_goal_feedback() -> void:
 	var progress := 0.0
 	if tuning != null and tuning.goal_hold_time > 0.0:
 		progress = clampf(_hold_timer / tuning.goal_hold_time, 0.0, 1.0)
+	var active := _inside_grace_timer > 0.0 or current_state == State.COMPLETE
+	var pulse := _activation_pulse
+	var active_amount := 1.0 if active else 0.0
 
 	if progress_fill != null:
-		progress_fill.scale.x = progress
-		progress_fill.visible = progress > 0.01
+		progress_fill.scale.x = maxf(progress, 0.12 if active else 0.0)
+		progress_fill.visible = active or progress > 0.01
+		if progress_fill is CanvasItem:
+			(progress_fill as CanvasItem).modulate = Color(1.0, 0.95, 0.22, 0.7 + progress * 0.3)
 	if glow_zone != null:
-		glow_zone.modulate = Color(1.0, 1.0, 1.0, 0.55 + progress * 0.45)
+		glow_zone.modulate = Color(0.65 + pulse * 0.35, 1.0, 0.35 + pulse * 0.2, 0.18 + active_amount * 0.42 + progress * 0.25)
+		if glow_zone is Node2D:
+			var glow_node := glow_zone as Node2D
+			var glow_scale := 1.0 + pulse * 0.12 + progress * 0.04
+			glow_node.scale = Vector2(glow_scale, glow_scale)
+	if landing_pad != null:
+		landing_pad.modulate = Color(1.0, 0.82 + active_amount * 0.16, 0.1 + active_amount * 0.18, 0.9 + active_amount * 0.1)
+	if flag_gold != null:
+		flag_gold.modulate = Color(1.0, 0.82 + pulse * 0.16, 0.1 + pulse * 0.18, 1.0)
+		if flag_gold is Node2D:
+			(flag_gold as Node2D).position.y = -pulse * 5.0
+	if flag_dark != null:
+		flag_dark.modulate = Color(0.08 + pulse * 0.1, 0.08 + pulse * 0.1, 0.14 + pulse * 0.12, 1.0)
+		if flag_dark is Node2D:
+			(flag_dark as Node2D).position.y = -pulse * 5.0
 
 func _resolve_player() -> PlayerController2D:
 	var node := get_node_or_null(player_path) if not player_path.is_empty() else null

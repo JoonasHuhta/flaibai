@@ -170,6 +170,8 @@ func respawn() -> void:
 		feedback_label.visible = false
 	if result_label != null:
 		result_label.visible = false
+	if flow_label != null:
+		flow_label.visible = false
 	if scoreboard != null:
 		scoreboard.call("hide_results")
 	if controls_hint != null:
@@ -316,6 +318,7 @@ func _update_flow_label() -> void:
 		return
 
 	flow_label.text = "Flow %d%%" % int(round(flow))
+	flow_label.visible = false
 
 func _is_tap_event(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
