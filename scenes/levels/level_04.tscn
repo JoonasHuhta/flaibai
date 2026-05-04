@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://bg66qs02iuaf1" path="res://scripts/core/camera_follow_2d.gd" id="5_camera"]
 [ext_resource type="Script" uid="uid://dm0h2uchlsaog" path="res://scripts/core/game_manager.gd" id="6_game"]
 [ext_resource type="Script" uid="uid://mneirhejbpr3" path="res://scripts/level/goal_zone.gd" id="7_goal"]
-[ext_resource type="PackedScene" uid="uid://bw3wur34tdwle" path="res://scenes/player/player_rig.tscn" id="8_player_rig"]
+[ext_resource type="PackedScene" uid="uid://dflaibaiplayerig" path="res://scenes/player/player_rig.tscn" id="8_player_rig"]
 [ext_resource type="Script" uid="uid://dgp8kup404fjt" path="res://scripts/ui/offscreen_indicator.gd" id="9_offscreen"]
 [ext_resource type="Script" uid="uid://c0imgg17rjyer" path="res://scripts/ui/scoreboard_ui.gd" id="10_scoreboard"]
 
