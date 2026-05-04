@@ -13,7 +13,7 @@ config_version=5
 config/name="Flaibai"
 run/main_scene="res://scenes/start_screen.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
-config/icon="res://icon.svg"
+config/icon="res://flaibai_icon.png"
 
 [autoload]
 
