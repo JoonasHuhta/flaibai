@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://dgp8kup404fjt" path="res://scripts/ui/offscreen_indicator.gd" id="9_offscreen"]
 [ext_resource type="Script" uid="uid://c0imgg17rjyer" path="res://scripts/ui/scoreboard_ui.gd" id="10_scoreboard"]
 [ext_resource type="Script" path="res://scripts/level/level_visual_theme.gd" id="11_theme"]
+[ext_resource type="Script" path="res://scripts/level/flaibit_collectible.gd" id="12_flaibit"]
 
 [sub_resource type="RectangleShape2D" id="GroundShape"]
 size = Vector2(800, 40)
@@ -90,6 +91,16 @@ offset_right = 374.0
 offset_bottom = 48.0
 theme_override_font_sizes/font_size = 18
 text = "Flow 0%"
+horizontal_alignment = 2
+
+[node name="FlaibitLabel" type="Label" parent="RetryLayer"]
+offset_left = 230.0
+offset_top = 18.0
+offset_right = 374.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(1, 0.9, 0.35, 0.96)
+theme_override_font_sizes/font_size = 17
+text = "Flaibit 0/3"
 horizontal_alignment = 2
 
 [node name="ResultLabel" type="Label" parent="RetryLayer" unique_id=2115708653]
@@ -241,6 +252,18 @@ shape = SubResource("PlatformShapeWide")
 [node name="Visual" type="Polygon2D" parent="FinalPlatform" unique_id=725628916]
 color = Color(1, 0.82, 0.1, 1)
 polygon = PackedVector2Array(-245, -14, 245, -14, 245, 14, -245, 14)
+
+[node name="FlaibitHighArc" type="Area2D" parent="."]
+position = Vector2(1140, 500)
+script = ExtResource("12_flaibit")
+
+[node name="FlaibitMushroomRisk" type="Area2D" parent="."]
+position = Vector2(1815, 450)
+script = ExtResource("12_flaibit")
+
+[node name="FlaibitFinishRisk" type="Area2D" parent="."]
+position = Vector2(2135, 470)
+script = ExtResource("12_flaibit")
 
 [node name="GoalZone" type="Area2D" parent="." unique_id=1111018357]
 position = Vector2(2235, 520)

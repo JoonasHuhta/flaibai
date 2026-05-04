@@ -63,6 +63,7 @@ func _style_hud(root: Node2D) -> void:
 		return
 
 	_style_label(retry_layer.get_node_or_null("ScoreLabel") as Label, 17, Color(1, 1, 1, 0.95), 3)
+	_style_label(retry_layer.get_node_or_null("FlaibitLabel") as Label, 17, Color(1.0, 0.90, 0.35, 0.96), 3)
 	_style_label(retry_layer.get_node_or_null("LandingFeedback") as Label, 24, Color(1, 0.94, 0.38, 1), 4)
 	_style_label(retry_layer.get_node_or_null("ControlsHint") as Label, 17, Color(1, 1, 1, 0.92), 3)
 	_style_label(retry_layer.get_node_or_null("TapToRetry") as Label, 26, Color(1, 1, 1, 0.96), 4)

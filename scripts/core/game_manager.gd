@@ -7,6 +7,7 @@ class_name GameManager
 @export var feedback_label_path: NodePath
 @export var score_label_path: NodePath
 @export var flow_label_path: NodePath
+@export var flaibit_label_path: NodePath = ^"../RetryLayer/FlaibitLabel"
 @export var controls_hint_path: NodePath
 @export var result_label_path: NodePath
 @export var retry_catcher_path: NodePath
@@ -19,6 +20,7 @@ var retry_label: CanvasItem
 var feedback_label: Label
 var score_label: Label
 var flow_label: Label
+var flaibit_label: Label
 var controls_hint: CanvasItem
 var result_label: Label
 var retry_catcher: Control
@@ -35,6 +37,8 @@ var best_time := -1.0
 var clean_streak := 0
 var best_clean_streak := 0
 var bounce_count := 0
+var flaibits_collected := 0
+var flaibits_total := 0
 var _spawn_position := Vector2.ZERO
 var _feedback_timer := 0.0
 var _controls_hint_timer := 4.5
@@ -55,6 +59,7 @@ func _initialize() -> void:
 	feedback_label = get_node_or_null(feedback_label_path) as Label
 	score_label = get_node_or_null(score_label_path) as Label
 	flow_label = get_node_or_null(flow_label_path) as Label
+	flaibit_label = get_node_or_null(flaibit_label_path) as Label
 	controls_hint = get_node_or_null(controls_hint_path) as CanvasItem
 	result_label = get_node_or_null(result_label_path) as Label
 	retry_catcher = get_node_or_null(retry_catcher_path) as Control
@@ -90,8 +95,10 @@ func _initialize() -> void:
 		scoreboard.connect("next_requested", Callable(self, "_load_next_level"))
 
 	_spawn_position = spawn_point.global_position if spawn_point != null else player.body.global_position
+	_initialize_flaibits()
 	_update_score_label()
 	_update_flow_label()
+	_update_flaibit_label()
 	_initialized = true
 
 func _input(event: InputEvent) -> void:
@@ -162,6 +169,8 @@ func respawn() -> void:
 	run_time = 0.0
 	clean_streak = 0
 	bounce_count = 0
+	flaibits_collected = 0
+	_reset_flaibits()
 	if retry_label != null:
 		retry_label.visible = false
 	if retry_catcher != null:
@@ -180,6 +189,7 @@ func respawn() -> void:
 	_feedback_timer = 0.0
 	_update_score_label()
 	_update_flow_label()
+	_update_flaibit_label()
 	player.reset_to_spawn(_spawn_position)
 	player.set_flow_boost(0.0)
 	if camera != null:
@@ -219,6 +229,22 @@ func complete_level() -> void:
 	if retry_catcher != null:
 		retry_catcher.visible = false
 	print("LEVEL COMPLETE - time: ", _format_time(run_time), " clean: ", clean_streak)
+
+func collect_flaibit(_collectible: Node) -> void:
+	if failed or level_completed:
+		return
+	flaibits_collected = clampi(flaibits_collected + 1, 0, flaibits_total)
+	_landing_bonus_score += 40
+	run_score += 40
+	if feedback_label != null:
+		feedback_label.text = "Flaibit %d/%d" % [flaibits_collected, flaibits_total]
+		feedback_label.visible = true
+		_feedback_timer = 0.75
+	var am = get_tree().root.get_node_or_null("AudioManager")
+	if am != null:
+		am.play_sfx("clean_streak", 1.12)
+	_update_score_label()
+	_update_flaibit_label()
 
 func _on_player_crashed() -> void:
 	_fail_run()
@@ -319,6 +345,12 @@ func _update_flow_label() -> void:
 
 	flow_label.text = "Flow %d%%" % int(round(flow))
 	flow_label.visible = false
+
+func _update_flaibit_label() -> void:
+	if flaibit_label == null:
+		return
+	flaibit_label.visible = flaibits_total > 0
+	flaibit_label.text = "Flaibit %d/%d" % [flaibits_collected, flaibits_total]
 
 func _is_tap_event(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
@@ -426,6 +458,26 @@ func _record_level_result() -> Dictionary:
 		}
 
 	return state.record_level_time(state.current_level_index, run_time, clean_streak)
+
+func _initialize_flaibits() -> void:
+	flaibits_collected = 0
+	flaibits_total = 0
+	var level_root := get_parent()
+	if level_root == null:
+		return
+	for node in get_tree().get_nodes_in_group("flaibit"):
+		if node is Node and level_root.is_ancestor_of(node):
+			flaibits_total += 1
+			if node.has_method("reset_collectible"):
+				node.call("reset_collectible")
+
+func _reset_flaibits() -> void:
+	var level_root := get_parent()
+	if level_root == null:
+		return
+	for node in get_tree().get_nodes_in_group("flaibit"):
+		if node is Node and level_root.is_ancestor_of(node) and node.has_method("reset_collectible"):
+			node.call("reset_collectible")
 
 func _get_current_level_name() -> String:
 	var state = get_tree().root.get_node_or_null("ProjectState")
