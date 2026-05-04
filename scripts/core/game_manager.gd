@@ -242,7 +242,7 @@ func collect_flaibit(_collectible: Node) -> void:
 		_feedback_timer = 0.75
 	var am = get_tree().root.get_node_or_null("AudioManager")
 	if am != null:
-		am.play_sfx("clean_streak", 1.12)
+		am.play_sfx("flaibit", 1.0)
 	_update_score_label()
 	_update_flaibit_label()
 
