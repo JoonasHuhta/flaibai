@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dflaibaiplayerig" path="res://scenes/player/player_rig.tscn" id="8_player_rig"]
 [ext_resource type="Script" uid="uid://dgp8kup404fjt" path="res://scripts/ui/offscreen_indicator.gd" id="9_offscreen"]
 [ext_resource type="Script" uid="uid://c0imgg17rjyer" path="res://scripts/ui/scoreboard_ui.gd" id="10_scoreboard"]
+[ext_resource type="Script" path="res://scripts/level/level_visual_theme.gd" id="11_theme"]
 
 [sub_resource type="RectangleShape2D" id="GroundShape"]
 size = Vector2(620, 40)
@@ -24,6 +25,9 @@ script = ExtResource("4_tuning")
 size = Vector2(120, 180)
 
 [node name="Level04" type="Node2D" unique_id=1169460522]
+
+[node name="VisualTheme" type="Node" parent="."]
+script = ExtResource("11_theme")
 
 [node name="GameManager" type="Node" parent="." unique_id=1072466905]
 script = ExtResource("6_game")
