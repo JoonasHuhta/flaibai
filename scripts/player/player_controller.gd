@@ -40,6 +40,10 @@ var _body_crash_grace_remaining := 0.0
 var _last_spawn_position := Vector2.ZERO
 var _crash_tumble_timer := 0.0
 var _crash_shown_retry := false
+## Side-lying detection: crash if grounded and tilted >72deg for too long
+var _grounded_tilt_timer := 0.0
+const _SIDE_TILT_LIMIT := 72.0
+const _SIDE_TILT_DURATION := 0.38
 
 func _ready() -> void:
 	if tuning == null:
@@ -64,6 +68,7 @@ func _physics_process(_delta: float) -> void:
 	_track_air_rotation()
 	if not _crashed:
 		_handle_air_control()
+		_check_side_lying(_delta)
 	else:
 		_handle_crash_tumble(_delta)
 
@@ -180,6 +185,7 @@ func reset_to_spawn(spawn_position: Vector2, spawn_rotation: float = 0.0) -> voi
 	_waiting_for_tap = true
 	_crash_tumble_timer = 0.0
 	_crash_shown_retry = false
+	_grounded_tilt_timer = 0.0
 	set_controls_enabled(true)
 
 	body.global_position = spawn_position
@@ -386,6 +392,27 @@ func _get_surface_rotation(ground_body: Node) -> float:
 	if ground_body is Node2D:
 		return (ground_body as Node2D).global_rotation
 	return 0.0
+
+# --- Side-lying crash detection ---
+
+func _check_side_lying(delta: float) -> void:
+	## If grounded and tilted sideways for too long, it's a crash.
+	## Grace period after bounce suppresses this so a 'just saved' tilt still works.
+	if _body_crash_grace_remaining > 0.0 or _waiting_for_tap:
+		_grounded_tilt_timer = 0.0
+		return
+	if not is_grounded_any():
+		# Decay timer faster when airborne so a partial tilt resets
+		_grounded_tilt_timer = maxf(_grounded_tilt_timer - delta * 2.5, 0.0)
+		return
+	var angle := absf(rad_to_deg(_normalize_angle(body.rotation)))
+	if angle > _SIDE_TILT_LIMIT:
+		_grounded_tilt_timer += delta
+		if _grounded_tilt_timer >= _SIDE_TILT_DURATION:
+			fail()
+	else:
+		# Recover: timer decays at 2x rate so small tilts fade quickly
+		_grounded_tilt_timer = maxf(_grounded_tilt_timer - delta * 2.0, 0.0)
 
 # --- Crash tumble ---
 

@@ -187,7 +187,7 @@ func complete_level() -> void:
 	var score_line := "Score: %d" % run_score
 
 	if result_label != null:
-		result_label.text = "KENTTÄ LÄPÄISTY!\n\n%s\n%s\n%s\n%s" % [time_line, best_line, clean_line, score_line]
+		result_label.text = "LEVEL COMPLETE!\n\n%s\n%s\n%s\n%s" % [time_line, best_line, clean_line, score_line]
 		result_label.visible = true
 	if feedback_label != null:
 		feedback_label.text = "🎉 Great run!"
