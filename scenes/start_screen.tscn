@@ -168,12 +168,12 @@ text = "I"
 
 [node name="TapLabel" type="Label" parent="UILayer"]
 offset_left = 0.0
-offset_top = 700.0
+offset_top = 540.0
 offset_right = 390.0
-offset_bottom = 750.0
+offset_bottom = 585.0
 pivot_offset = Vector2(195, 25)
 theme_override_colors/font_color = Color(1, 1, 1, 0.9)
-theme_override_font_sizes/font_size = 28
-text = "TAP TO PLAY"
+theme_override_font_sizes/font_size = 22
+text = "SELECT LEVEL"
 horizontal_alignment = 1
 vertical_alignment = 1

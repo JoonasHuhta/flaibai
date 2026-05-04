@@ -1,10 +1,11 @@
-[gd_scene format=3 uid="uid://dwx2w2bgwgpl6"]
+[gd_scene format=3 uid="uid://c7w5flaibailevel02"]
 
 [ext_resource type="Script" uid="uid://fiq6p1g26syf" path="res://scripts/player/player_tuning.gd" id="4_tuning"]
 [ext_resource type="Script" uid="uid://bg66qs02iuaf1" path="res://scripts/core/camera_follow_2d.gd" id="5_camera"]
 [ext_resource type="Script" uid="uid://dm0h2uchlsaog" path="res://scripts/core/game_manager.gd" id="6_game"]
 [ext_resource type="Script" uid="uid://mneirhejbpr3" path="res://scripts/level/goal_zone.gd" id="7_goal"]
 [ext_resource type="PackedScene" path="res://scenes/player/player_rig.tscn" id="8_player_rig"]
+[ext_resource type="Script" path="res://scripts/ui/offscreen_indicator.gd" id="9_offscreen"]
 [ext_resource type="Script" path="res://scripts/ui/scoreboard_ui.gd" id="10_scoreboard"]
 
 
@@ -43,7 +44,7 @@ size = Vector2(120, 180)
 
 
 
-[node name="FlaibaiPrototype" type="Node2D" unique_id=1169460522]
+[node name="Level02" type="Node2D" unique_id=1169460522]
 
 [node name="GameManager" type="Node" parent="." unique_id=1072466905]
 script = ExtResource("6_game")
@@ -64,7 +65,7 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 2
+mouse_filter = 0
 
 [node name="TapToRetry" type="Label" parent="RetryLayer"]
 visible = false
@@ -127,6 +128,28 @@ text = "Tap to bounce\nHold left / right to tilt"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="LevelLabel" type="Label" parent="RetryLayer"]
+offset_left = 28.0
+offset_top = 18.0
+offset_right = 362.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 0.6)
+theme_override_font_sizes/font_size = 14
+text = "LEVEL 2 - Long Hop"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OffscreenIndicator" type="Control" parent="RetryLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("9_offscreen")
+target_path = NodePath("../../Flaibai/Body")
+
 [node name="ScoreboardUI" type="Control" parent="RetryLayer"]
 visible = false
 layout_mode = 3
@@ -135,7 +158,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 0
 script = ExtResource("10_scoreboard")
 
 [node name="SkyPanel" type="Polygon2D" parent="."]
@@ -367,37 +390,40 @@ position = Vector2(6280, 668)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="FinalPlatform"]
 shape = SubResource("PlatformShape")
+scale = Vector2(1.6, 1.0)
 
 [node name="Visual" type="Polygon2D" parent="FinalPlatform"]
 color = Color(1.0, 0.82, 0.1, 1)
-polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+polygon = PackedVector2Array(-185, -14, 185, -14, 185, 14, -185, 14)
 
 [node name="GoalZone" type="Area2D" parent="." unique_id=1091897052]
 position = Vector2(6280, 535)
 script = ExtResource("7_goal")
 tuning = SubResource("PlayerTuning_arcade")
+half_width = 165.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone" unique_id=1090072342]
 shape = SubResource("GoalShape")
+scale = Vector2(1.45, 1.0)
 debug_color = Color(0.2, 1.0, 0.4, 0.25)
 
 [node name="GlowZone" type="Polygon2D" parent="GoalZone"]
 color = Color(0.2, 1.0, 0.45, 0.12)
-polygon = PackedVector2Array(-60, -90, 60, -90, 60, 90, -60, 90)
+polygon = PackedVector2Array(-120, -90, 120, -90, 120, 90, -120, 90)
 
 [node name="LandingPad" type="Polygon2D" parent="GoalZone"]
 color = Color(1.0, 0.85, 0.1, 0.9)
-polygon = PackedVector2Array(-72, 72, 72, 72, 80, 90, -80, 90)
+polygon = PackedVector2Array(-130, 72, 130, 72, 142, 90, -142, 90)
 
 [node name="PadStripe" type="Polygon2D" parent="GoalZone"]
 color = Color(0.08, 0.08, 0.12, 0.6)
-polygon = PackedVector2Array(-72, 72, 72, 72, 72, 82, -72, 82)
+polygon = PackedVector2Array(-130, 72, 130, 72, 130, 82, -130, 82)
 
 [node name="ProgressFill" type="Polygon2D" parent="GoalZone"]
 visible = false
-position = Vector2(-72, 72)
+position = Vector2(-130, 72)
 color = Color(0.2, 1.0, 0.45, 0.75)
-polygon = PackedVector2Array(0, 0, 144, 0, 144, 10, 0, 10)
+polygon = PackedVector2Array(0, 0, 260, 0, 260, 10, 0, 10)
 
 [node name="Pole" type="Polygon2D" parent="GoalZone"]
 color = Color(0.85, 0.88, 0.92, 1)
@@ -421,4 +447,5 @@ target_path = NodePath("../Flaibai/Body")
 max_x = 6480.0
 min_y = 260.0
 max_y = 620.0
+
 

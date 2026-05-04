@@ -10,6 +10,7 @@ class_name GameManager
 @export var controls_hint_path: NodePath
 @export var result_label_path: NodePath
 @export var retry_catcher_path: NodePath
+@export var scoreboard_path: NodePath = ^"../RetryLayer/ScoreboardUI"
 @export var fail_y: float = 980.0
 
 var player: PlayerController2D
@@ -21,6 +22,8 @@ var flow_label: Label
 var controls_hint: CanvasItem
 var result_label: Label
 var retry_catcher: Control
+var scoreboard: Node
+var camera: CameraFollow2D
 
 var level_completed := false
 var failed := false
@@ -37,7 +40,7 @@ var _feedback_timer := 0.0
 var _controls_hint_timer := 4.5
 var _landing_bonus_score := 0
 var _initialized := false
-const SAVE_PATH := "user://flaibai_records.cfg"
+var _scene_transition_started := false
 
 func _ready() -> void:
 	call_deferred("_initialize")
@@ -55,12 +58,15 @@ func _initialize() -> void:
 	controls_hint = get_node_or_null(controls_hint_path) as CanvasItem
 	result_label = get_node_or_null(result_label_path) as Label
 	retry_catcher = get_node_or_null(retry_catcher_path) as Control
+	scoreboard = get_node_or_null(scoreboard_path)
+	camera = get_parent().get_node_or_null("Camera2D") as CameraFollow2D if get_parent() != null else null
 
 	if player == null:
 		push_error("GameManager could not find Flaibai/PlayerController2D.")
 		set_process(false)
 		return
 
+	_sync_project_state_to_current_scene()
 	_load_records()
 	player.crashed.connect(_on_player_crashed)
 	player.bounced.connect(_on_player_bounced)
@@ -78,6 +84,10 @@ func _initialize() -> void:
 	if retry_catcher != null:
 		retry_catcher.visible = false
 		retry_catcher.gui_input.connect(_on_retry_catcher_gui_input)
+	if scoreboard != null:
+		scoreboard.call("hide_results")
+		scoreboard.connect("retry_requested", Callable(self, "respawn"))
+		scoreboard.connect("next_requested", Callable(self, "_load_next_level"))
 
 	_spawn_position = spawn_point.global_position if spawn_point != null else player.body.global_position
 	_update_score_label()
@@ -87,24 +97,26 @@ func _initialize() -> void:
 func _input(event: InputEvent) -> void:
 	if not (failed or level_completed):
 		return
-	if not _is_tap_event(event):
-		return
 	if level_completed:
-		_load_next_level()
+		if _is_next_key_event(event):
+			_load_next_level()
+			get_viewport().set_input_as_handled()
 	else:
-		respawn()
-	get_viewport().set_input_as_handled()
+		if _is_tap_event(event):
+			respawn()
+			get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not (failed or level_completed):
 		return
-	if not _is_tap_event(event):
-		return
 	if level_completed:
-		_load_next_level()
+		if _is_next_key_event(event):
+			_load_next_level()
+			get_viewport().set_input_as_handled()
 	else:
-		respawn()
-	get_viewport().set_input_as_handled()
+		if _is_tap_event(event):
+			respawn()
+			get_viewport().set_input_as_handled()
 
 func _process(_delta: float) -> void:
 	if not _initialized:
@@ -141,6 +153,7 @@ func respawn() -> void:
 	if player == null:
 		return
 
+	_scene_transition_started = false
 	failed = false
 	level_completed = false
 	run_score = 0
@@ -157,6 +170,8 @@ func respawn() -> void:
 		feedback_label.visible = false
 	if result_label != null:
 		result_label.visible = false
+	if scoreboard != null:
+		scoreboard.call("hide_results")
 	if controls_hint != null:
 		controls_hint.visible = true
 	_controls_hint_timer = 3.0
@@ -165,48 +180,43 @@ func respawn() -> void:
 	_update_flow_label()
 	player.reset_to_spawn(_spawn_position)
 	player.set_flow_boost(0.0)
+	if camera != null:
+		camera.reset_focus()
 
 func complete_level() -> void:
 	if level_completed:
 		return
 
+	failed = false
 	level_completed = true
-	var previous_best_time := best_time
-	var new_best := best_time < 0.0 or run_time < best_time
+	var result := _record_level_result()
+	var new_best: bool = bool(result.get("new_record", false))
 	if new_best:
 		best_time = run_time
 	best_clean_streak = maxi(best_clean_streak, clean_streak)
 	best_score = max(best_score, run_score + 500)
 	run_score += 500
 	flow = 100.0
-	_save_records()
 	_update_score_label()
 	_update_flow_label()
 
-	# Build the result card text
-	var time_line := "⏱  %s" % _format_time(run_time)
-	var best_line := "🏆 New best!" if new_best else ("Best: %s" % _format_time(previous_best_time if previous_best_time >= 0.0 else run_time))
-	var clean_line := "✨ Clean landings: %d" % clean_streak
-	var score_line := "Score: %d" % run_score
-
 	if result_label != null:
-		result_label.text = "LEVEL COMPLETE!\n\n%s\n%s\n%s\n%s" % [time_line, best_line, clean_line, score_line]
-		result_label.visible = true
+		result_label.visible = false
+	if scoreboard != null:
+		scoreboard.call("show_results", _get_current_level_name(), result, Callable(self, "_format_time"))
 	var am = get_tree().root.get_node_or_null("AudioManager")
 	if am != null:
 		am.play_sfx("level_complete")
 		am.stop_music()
 	if feedback_label != null:
-		feedback_label.text = "🎉 Great run!"
+		feedback_label.text = "Great run!"
 		feedback_label.visible = true
 		_feedback_timer = 1.5
 	if retry_label != null:
-		retry_label.visible = true
-		if retry_label is Label:
-			(retry_label as Label).text = "▶  Next Level"
+		retry_label.visible = false
 	if retry_catcher != null:
-		retry_catcher.visible = true
-	print("LEVEL COMPLETE — time: ", _format_time(run_time), " clean: ", clean_streak)
+		retry_catcher.visible = false
+	print("LEVEL COMPLETE - time: ", _format_time(run_time), " clean: ", clean_streak)
 
 func _on_player_crashed() -> void:
 	_fail_run()
@@ -280,6 +290,8 @@ func _fail_run() -> void:
 	if player != null:
 		player.set_controls_enabled(false)
 		player.set_flow_boost(0.0)
+	if camera != null:
+		camera.focus_crash()
 	# Delay retry UI to let crash tumble animation play out
 	get_tree().create_timer(0.5).timeout.connect(_show_retry_ui)
 
@@ -314,14 +326,44 @@ func _is_tap_event(event: InputEvent) -> bool:
 		return event.pressed and event.keycode == KEY_R
 	return false
 
+func _is_next_key_event(event: InputEvent) -> bool:
+	if event is InputEventKey:
+		return event.pressed and event.keycode in [KEY_ENTER, KEY_SPACE]
+	return false
+
 func _load_next_level() -> void:
+	if _scene_transition_started:
+		return
+	_scene_transition_started = true
+
 	var state = get_tree().root.get_node_or_null("ProjectState")
 	if state != null:
 		state.advance_level()
-		get_tree().change_scene_to_file(state.get_current_scene())
+		var next_scene: String = str(state.get_current_scene())
+		var error := get_tree().change_scene_to_file(next_scene)
+		if error != OK:
+			push_error("Could not load next Flaibai level: %s error=%d" % [next_scene, error])
+			_scene_transition_started = false
 	else:
 		# Fallback: reload current scene
-		get_tree().reload_current_scene()
+		var error := get_tree().reload_current_scene()
+		if error != OK:
+			push_error("Could not reload Flaibai scene. error=%d" % error)
+			_scene_transition_started = false
+
+func _sync_project_state_to_current_scene() -> void:
+	var state = get_tree().root.get_node_or_null("ProjectState")
+	if state == null or get_parent() == null:
+		return
+
+	var current_scene_path := str(get_parent().scene_file_path)
+	if current_scene_path.is_empty():
+		return
+
+	for i in state.level_scenes.size():
+		if str(state.level_scenes[i]) == current_scene_path:
+			state.start_level(i)
+			return
 
 func _on_retry_catcher_gui_input(event: InputEvent) -> void:
 	if not _is_tap_event(event):
@@ -334,9 +376,12 @@ func _on_retry_catcher_gui_input(event: InputEvent) -> void:
 
 func _format_time(seconds: float) -> String:
 	var clamped_seconds := maxf(seconds, 0.0)
-	var whole_seconds := int(floor(clamped_seconds))
-	var centiseconds := int(floor((clamped_seconds - whole_seconds) * 100.0))
-	return "%02d.%02d" % [whole_seconds, centiseconds]
+	var total_milliseconds := int(round(clamped_seconds * 1000.0))
+	var minutes := total_milliseconds / 60000
+	var remaining := total_milliseconds % 60000
+	var whole_seconds := remaining / 1000
+	var milliseconds := remaining % 1000
+	return "%d:%02d.%03d" % [minutes, whole_seconds, milliseconds]
 
 func _format_best_time() -> String:
 	if best_time < 0.0:
@@ -357,23 +402,33 @@ func _format_result_text(new_best: bool, previous_best_time: float) -> String:
 	]
 
 func _load_records() -> void:
-	var config := ConfigFile.new()
-	var error := config.load(SAVE_PATH)
-	if error != OK:
-		return
+	var state = get_tree().root.get_node_or_null("ProjectState")
+	if state != null:
+		best_time = state.get_best_time(state.current_level_index)
+		best_clean_streak = state.get_best_clean_streak(state.current_level_index)
 
-	var saved_best_time: Variant = config.get_value("level_1", "best_time", -1.0)
-	var saved_best_streak: Variant = config.get_value("level_1", "best_clean_streak", 0)
-	best_time = float(saved_best_time)
-	best_clean_streak = int(saved_best_streak)
+func _record_level_result() -> Dictionary:
+	var state = get_tree().root.get_node_or_null("ProjectState")
+	if state == null:
+		var new_best := best_time < 0.0 or run_time < best_time
+		if new_best:
+			best_time = run_time
+		return {
+			"qualified": true,
+			"new_record": new_best,
+			"rank": 1 if new_best else -1,
+			"previous_best": -1.0,
+			"time": run_time,
+			"entries": [{"time": run_time, "date": ""}],
+		}
 
-func _save_records() -> void:
-	var config := ConfigFile.new()
-	config.set_value("level_1", "best_time", best_time)
-	config.set_value("level_1", "best_clean_streak", best_clean_streak)
-	var error := config.save(SAVE_PATH)
-	if error != OK:
-		push_warning("Could not save Flaibai records.")
+	return state.record_level_time(state.current_level_index, run_time, clean_streak)
+
+func _get_current_level_name() -> String:
+	var state = get_tree().root.get_node_or_null("ProjectState")
+	if state == null:
+		return "Level"
+	return str(state.get_level_name(state.current_level_index))
 
 func _resolve_player() -> PlayerController2D:
 	var node := get_node_or_null(player_path) if not player_path.is_empty() else null

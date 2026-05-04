@@ -10,19 +10,31 @@ class_name CameraFollow2D
 @export var max_x: float = 2600.0
 @export var min_y: float = 240.0
 @export var max_y: float = 680.0
+@export var crash_zoom: Vector2 = Vector2(0.88, 0.88)
+@export var zoom_speed: float = 5.0
 
 @onready var target: Node2D = get_node_or_null(target_path)
 
 var _shake_intensity := 0.0
 var _shake_timer := 0.0
 var _shake_decay := 8.0
+var _base_zoom := Vector2.ONE
+var _target_zoom := Vector2.ONE
 
 func _ready() -> void:
+	_base_zoom = zoom
+	_target_zoom = zoom
 	make_current()
 
 func shake(intensity: float, duration: float = 0.2) -> void:
 	_shake_intensity = maxf(_shake_intensity, intensity)
 	_shake_timer = maxf(_shake_timer, duration)
+
+func focus_crash() -> void:
+	_target_zoom = crash_zoom
+
+func reset_focus() -> void:
+	_target_zoom = _base_zoom
 
 func _process(delta: float) -> void:
 	if target == null:
@@ -39,6 +51,7 @@ func _process(delta: float) -> void:
 	global_position.x = lerpf(global_position.x, target_x, 1.0 - exp(-follow_speed * delta))
 	# Intentionally slower vertical follow — lets Flaibai fly off-screen briefly
 	global_position.y = lerpf(global_position.y, target_y, 1.0 - exp(-vertical_follow_speed * delta))
+	zoom = zoom.lerp(_target_zoom, 1.0 - exp(-zoom_speed * delta))
 
 	# Camera shake
 	_shake_timer = maxf(_shake_timer - delta, 0.0)

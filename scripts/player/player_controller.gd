@@ -12,15 +12,18 @@ signal request_camera_shake(intensity: float, duration: float)
 @export var right_foot_path: NodePath = ^"RightFoot"
 @export var left_contact_path: NodePath = ^"LeftFoot"
 @export var right_contact_path: NodePath = ^"RightFoot"
+@export var head_contact_path: NodePath = ^"HeadContact"
 @export var tuning: PlayerTuning
-@export var left_foot_offset: Vector2 = Vector2(-17.0, 70.0)
-@export var right_foot_offset: Vector2 = Vector2(17.0, 70.0)
+@export var left_foot_offset: Vector2 = Vector2(-15.5, 64.0)
+@export var right_foot_offset: Vector2 = Vector2(15.5, 64.0)
+@export var head_contact_offset: Vector2 = Vector2(0.0, -38.5)
 
 @onready var body: RigidBody2D = get_node(body_path)
 @onready var left_foot: Node2D = get_node(left_foot_path)
 @onready var right_foot: Node2D = get_node(right_foot_path)
 @onready var left_contact: FootContact2D = get_node(left_contact_path)
 @onready var right_contact: FootContact2D = get_node(right_contact_path)
+@onready var head_contact: HeadContact2D = get_node_or_null(head_contact_path) as HeadContact2D
 
 # --- State ---
 ## True before first tap, and after moss landing. Player must tap to launch.
@@ -179,6 +182,19 @@ func try_foot_bounce(impact_speed: float, ground_body: Node = null) -> void:
 	if surface != "normal":
 		surface_touched.emit(surface)
 
+func try_head_crash(ground_body: Node) -> void:
+	if _crashed or _waiting_for_tap:
+		return
+	if ground_body == null or not ground_body.is_in_group("ground"):
+		return
+
+	var speed := body.linear_velocity.length()
+	var angle := absf(rad_to_deg(_normalize_angle(body.rotation)))
+	if speed < 70.0 and angle < 45.0 and is_grounded_any():
+		return
+
+	fail()
+
 func reset_to_spawn(spawn_position: Vector2, spawn_rotation: float = 0.0) -> void:
 	rotation = 0.0
 	global_position = Vector2.ZERO
@@ -202,6 +218,8 @@ func reset_to_spawn(spawn_position: Vector2, spawn_rotation: float = 0.0) -> voi
 	_sync_feet_to_body()
 	left_contact.reset_contact_state()
 	right_contact.reset_contact_state()
+	if head_contact != null:
+		head_contact.reset_contact_state()
 
 func fail() -> void:
 	if _crashed:
@@ -451,6 +469,9 @@ func _sync_feet_to_body() -> void:
 	right_foot.global_position = body.global_position + right_foot_offset.rotated(body.rotation)
 	left_foot.global_rotation = body.rotation
 	right_foot.global_rotation = body.rotation
+	if head_contact != null:
+		head_contact.global_position = body.global_position + head_contact_offset.rotated(body.rotation)
+		head_contact.global_rotation = body.rotation
 
 # --- Air rotation tracking ---
 
