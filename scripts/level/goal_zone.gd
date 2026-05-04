@@ -10,9 +10,9 @@ enum State {
 @export var player_path: NodePath
 @export var game_manager_path: NodePath
 @export var tuning: PlayerTuning
-@export var half_width: float = 190.0
-@export var half_height: float = 180.0
-@export var contact_grace_time: float = 0.28
+@export var half_width: float = 180.0
+@export var half_height: float = 170.0
+@export var contact_grace_time: float = 0.22
 @export var clean_hold_time: float = 0.08
 @export var sloppy_hold_time: float = 0.04
 @export var crash_hold_time: float = 0.04
@@ -20,8 +20,8 @@ enum State {
 @export var instant_finish_max_speed: float = 2600.0
 @export var sloppy_max_speed: float = 760.0
 @export var sloppy_max_vertical_speed: float = 560.0
-@export var sweep_extra_width: float = 220.0
-@export var sweep_extra_height: float = 160.0
+@export var sweep_extra_width: float = 35.0
+@export var sweep_extra_height: float = 80.0
 @export var progress_path: NodePath = ^"ProgressFill"
 @export var glow_path: NodePath = ^"GlowZone"
 @export var landing_pad_path: NodePath = ^"LandingPad"

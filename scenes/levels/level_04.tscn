@@ -387,17 +387,17 @@ polygon = PackedVector2Array(-185, -14, 185, -14, 185, 14, -185, 14)
 position = Vector2(6280, 535)
 script = ExtResource("7_goal")
 tuning = SubResource("PlayerTuning_arcade")
-half_width = 205.0
-half_height = 190.0
+half_width = 180.0
+half_height = 175.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone" unique_id=1090072342]
-scale = Vector2(1.8, 1.35)
+scale = Vector2(1.45, 1.15)
 shape = SubResource("GoalShape")
 debug_color = Color(0.2, 1, 0.4, 0.25)
 
 [node name="GlowZone" type="Polygon2D" parent="GoalZone" unique_id=1795960928]
 color = Color(0.2, 1, 0.45, 0.12)
-polygon = PackedVector2Array(-155, -120, 155, -120, 155, 120, -155, 120)
+polygon = PackedVector2Array(-135, -105, 135, -105, 135, 105, -135, 105)
 
 [node name="LandingPad" type="Polygon2D" parent="GoalZone" unique_id=1633566325]
 color = Color(1, 0.85, 0.1, 0.9)
