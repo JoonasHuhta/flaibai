@@ -24,6 +24,9 @@ signal request_camera_shake(intensity: float, duration: float)
 @onready var left_contact: FootContact2D = get_node(left_contact_path)
 @onready var right_contact: FootContact2D = get_node(right_contact_path)
 @onready var head_contact: HeadContact2D = get_node_or_null(head_contact_path) as HeadContact2D
+@onready var cap_visual: Node2D = get_node_or_null(^"VisualRoot/Head/Cap")
+
+const CAP_PROP_SCENE = preload("res://scenes/player/cap_prop.tscn")
 
 # --- State ---
 ## True before first tap, and after moss landing. Player must tap to launch.
@@ -43,6 +46,7 @@ var _body_crash_grace_remaining := 0.0
 var _last_spawn_position := Vector2.ZERO
 var _crash_tumble_timer := 0.0
 var _crash_shown_retry := false
+var _active_flying_cap: RigidBody2D = null
 ## Side-lying detection: crash if grounded and tilted >72deg for too long
 var _grounded_tilt_timer := 0.0
 const _SIDE_TILT_LIMIT := 72.0
@@ -202,6 +206,13 @@ func reset_to_spawn(spawn_position: Vector2, spawn_rotation: float = 0.0) -> voi
 	_waiting_for_tap = true
 	_crash_tumble_timer = 0.0
 	_crash_shown_retry = false
+	
+	if cap_visual != null:
+		cap_visual.visible = true
+	if is_instance_valid(_active_flying_cap):
+		_active_flying_cap.queue_free()
+		_active_flying_cap = null
+		
 	_grounded_tilt_timer = 0.0
 	set_controls_enabled(true)
 
@@ -235,6 +246,18 @@ func fail() -> void:
 	Input.vibrate_handheld(80)
 	request_camera_shake.emit(4.0, 0.25)
 	_play_sfx("crash")
+	
+	if cap_visual != null and cap_visual.visible:
+		cap_visual.visible = false
+		if CAP_PROP_SCENE != null and get_tree().current_scene != null:
+			_active_flying_cap = CAP_PROP_SCENE.instantiate() as RigidBody2D
+			get_tree().current_scene.add_child(_active_flying_cap)
+			_active_flying_cap.global_position = cap_visual.global_position
+			_active_flying_cap.global_rotation = cap_visual.global_rotation
+			var launch_velocity = body.linear_velocity * 0.8 + Vector2(randf_range(-150, 150), randf_range(-400, -150))
+			_active_flying_cap.linear_velocity = launch_velocity
+			_active_flying_cap.angular_velocity = body.angular_velocity + randf_range(-10.0, 10.0)
+			
 	crashed.emit()
 
 func celebrate() -> void:
@@ -389,15 +412,17 @@ func _bad_landing_bounce(impact_speed: float, angle_degrees: float, surface: Str
 		surface_touched.emit(surface)
 
 func _absorb_landing(impact_speed: float) -> void:
-	# Moss: full stop, wait for tap
-	body.linear_velocity = Vector2.ZERO
-	body.angular_velocity = 0.0
-	_spring_visual_peak = clampf(impact_speed / 900.0, 0.2, 0.55)
-	_spring_visual_timer = tuning.spring_visual_compression_time * 1.4
-	_bounce_cooldown_remaining = tuning.bounce_cooldown * 2.4
-	_body_crash_grace_remaining = 0.1
+	# Moss is a soft recovery surface: it kills most speed, but still gives a small forgiving hop.
+	var preserved_forward := clampf(body.linear_velocity.x * 0.22, 95.0, 210.0)
+	var soft_lift := clampf(260.0 + impact_speed * 0.16, 320.0, 500.0)
+	body.linear_velocity = Vector2(preserved_forward, -soft_lift)
+	body.angular_velocity *= 0.25
+	_spring_visual_peak = clampf(impact_speed / 900.0, 0.25, 0.62)
+	_spring_visual_timer = tuning.spring_visual_compression_time * 1.25
+	_bounce_cooldown_remaining = tuning.bounce_cooldown * 1.15
+	_body_crash_grace_remaining = 0.16
 	_play_sfx("moss_stop")
-	_waiting_for_tap = true
+	_waiting_for_tap = false
 
 func _get_surface_type(ground_body: Node) -> String:
 	if ground_body == null:

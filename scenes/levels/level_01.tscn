@@ -4,9 +4,9 @@
 [ext_resource type="Script" uid="uid://bg66qs02iuaf1" path="res://scripts/core/camera_follow_2d.gd" id="5_camera"]
 [ext_resource type="Script" uid="uid://dm0h2uchlsaog" path="res://scripts/core/game_manager.gd" id="6_game"]
 [ext_resource type="Script" uid="uid://mneirhejbpr3" path="res://scripts/level/goal_zone.gd" id="7_goal"]
-[ext_resource type="PackedScene" path="res://scenes/player/player_rig.tscn" id="8_player_rig"]
-[ext_resource type="Script" path="res://scripts/ui/offscreen_indicator.gd" id="9_offscreen"]
-[ext_resource type="Script" path="res://scripts/ui/scoreboard_ui.gd" id="10_scoreboard"]
+[ext_resource type="PackedScene" uid="uid://bw3wur34tdwle" path="res://scenes/player/player_rig.tscn" id="8_player_rig"]
+[ext_resource type="Script" uid="uid://dgp8kup404fjt" path="res://scripts/ui/offscreen_indicator.gd" id="9_offscreen"]
+[ext_resource type="Script" uid="uid://c0imgg17rjyer" path="res://scripts/ui/scoreboard_ui.gd" id="10_scoreboard"]
 
 [sub_resource type="RectangleShape2D" id="GroundShape"]
 size = Vector2(800, 40)
@@ -15,16 +15,13 @@ size = Vector2(800, 40)
 size = Vector2(360, 28)
 
 [sub_resource type="RectangleShape2D" id="PlatformShape"]
-size = Vector2(396, 28)
+size = Vector2(343, 28)
 
 [sub_resource type="Resource" id="PlayerTuning_01"]
 script = ExtResource("4_tuning")
 
 [sub_resource type="RectangleShape2D" id="GoalShape"]
 size = Vector2(130, 200)
-
-
-
 
 [node name="Level01" type="Node2D" unique_id=1853042419]
 
@@ -125,7 +122,7 @@ text = "LEVEL 1 - First Steps"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="OffscreenIndicator" type="Control" parent="RetryLayer"]
+[node name="OffscreenIndicator" type="Control" parent="RetryLayer" unique_id=1686680168]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -136,7 +133,7 @@ mouse_filter = 2
 script = ExtResource("9_offscreen")
 target_path = NodePath("../../Flaibai/Body")
 
-[node name="ScoreboardUI" type="Control" parent="RetryLayer"]
+[node name="ScoreboardUI" type="Control" parent="RetryLayer" unique_id=378350204]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -149,8 +146,9 @@ script = ExtResource("10_scoreboard")
 
 [node name="SkyPanel" type="Polygon2D" parent="." unique_id=1982574614]
 z_index = -30
+scale = Vector2(1.3629119, 2.2195377)
 color = Color(0.38, 0.62, 0.85, 1)
-polygon = PackedVector2Array(-600, -300, 4000, -300, 4000, 900, -600, 900)
+polygon = PackedVector2Array(-600, -300, 4000, -300, 4000, 900, 1692.9746, 900, -600, 900)
 
 [node name="Sun" type="Polygon2D" parent="." unique_id=597981245]
 z_index = -25
@@ -222,32 +220,33 @@ polygon = PackedVector2Array(-150, -14, 150, -14, 150, 14, -150, 14)
 position = Vector2(1780, 618)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform3" unique_id=1053174386]
+position = Vector2(-26.5, 0)
 shape = SubResource("PlatformShape")
 
 [node name="Visual" type="Polygon2D" parent="Platform3" unique_id=2061673814]
 color = Color(1, 0.32, 0.34, 1)
 polygon = PackedVector2Array(-196, -7, -120, -28, -55, -34, 0, -26, 55, -34, 120, -28, 150, -8, 140, 14, -140, 14)
 
-[node name="FinalPlatform" type="StaticBody2D" parent="." groups=["ground"]]
-position = Vector2(2160, 678)
+[node name="FinalPlatform" type="StaticBody2D" parent="." unique_id=141701630 groups=["ground"]]
+position = Vector2(2240, 645)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FinalPlatform"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FinalPlatform" unique_id=1818525160]
+scale = Vector2(1.35, 1)
 shape = SubResource("PlatformShapeWide")
-scale = Vector2(1.35, 1.0)
 
-[node name="Visual" type="Polygon2D" parent="FinalPlatform"]
-color = Color(1.0, 0.82, 0.1, 1)
+[node name="Visual" type="Polygon2D" parent="FinalPlatform" unique_id=725628916]
+color = Color(1, 0.82, 0.1, 1)
 polygon = PackedVector2Array(-245, -14, 245, -14, 245, 14, -245, 14)
 
 [node name="GoalZone" type="Area2D" parent="." unique_id=1111018357]
-position = Vector2(2160, 530)
+position = Vector2(2235, 520)
 script = ExtResource("7_goal")
 tuning = SubResource("PlayerTuning_01")
 half_width = 165.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone" unique_id=2069813804]
+scale = Vector2(1.45, 1)
 shape = SubResource("GoalShape")
-scale = Vector2(1.45, 1.0)
 debug_color = Color(0.2, 1, 0.4, 0.25)
 
 [node name="GlowZone" type="Polygon2D" parent="GoalZone" unique_id=1569337611]
@@ -262,7 +261,7 @@ polygon = PackedVector2Array(-130, 82, 130, 82, 142, 100, -142, 100)
 color = Color(0.08, 0.08, 0.12, 0.6)
 polygon = PackedVector2Array(-130, 82, 130, 82, 130, 92, -130, 92)
 
-[node name="ProgressFill" type="Polygon2D" parent="GoalZone"]
+[node name="ProgressFill" type="Polygon2D" parent="GoalZone" unique_id=446613195]
 visible = false
 position = Vector2(-130, 72)
 color = Color(0.2, 1, 0.45, 0.75)
@@ -280,14 +279,14 @@ polygon = PackedVector2Array(5, -140, 58, -125, 58, -108, 5, -122)
 color = Color(0.08, 0.08, 0.14, 1)
 polygon = PackedVector2Array(5, -122, 58, -108, 58, -90, 5, -105)
 
-[node name="Flaibai" parent="." instance=ExtResource("8_player_rig")]
+[node name="Flaibai" parent="." unique_id=488211817 instance=ExtResource("8_player_rig")]
 tuning = SubResource("PlayerTuning_01")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=188588711]
 position = Vector2(195, 330)
+zoom = Vector2(0.7, 0.7)
 script = ExtResource("5_camera")
 target_path = NodePath("../Flaibai/Body")
 max_x = 2400.0
 min_y = 260.0
 max_y = 620.0
-

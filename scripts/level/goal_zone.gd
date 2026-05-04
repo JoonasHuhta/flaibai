@@ -20,6 +20,8 @@ enum State {
 @export var instant_finish_max_speed: float = 1180.0
 @export var sloppy_max_speed: float = 760.0
 @export var sloppy_max_vertical_speed: float = 560.0
+@export var sweep_extra_width: float = 140.0
+@export var sweep_extra_height: float = 90.0
 @export var progress_path: NodePath = ^"ProgressFill"
 @export var glow_path: NodePath = ^"GlowZone"
 
@@ -34,6 +36,10 @@ var _hold_timer := 0.0
 var _player_inside := false
 var _inside_grace_timer := 0.0
 var _completion_started := false
+var _last_body_position := Vector2.INF
+var _last_left_foot_position := Vector2.INF
+var _last_right_foot_position := Vector2.INF
+var _last_head_position := Vector2.INF
 
 func _ready() -> void:
 	player = _resolve_player()
@@ -52,6 +58,7 @@ func _ready() -> void:
 
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	_store_player_positions()
 
 func _process(delta: float) -> void:
 	if current_state == State.COMPLETE or _completion_started:
@@ -64,7 +71,9 @@ func _process(delta: float) -> void:
 		return
 
 	var currently_inside := _is_player_inside_goal()
-	if currently_inside:
+	var swept_inside := _did_player_sweep_through_goal()
+	var finish_contact := currently_inside or swept_inside
+	if finish_contact:
 		_inside_grace_timer = contact_grace_time
 	else:
 		_inside_grace_timer = maxf(_inside_grace_timer - delta, 0.0)
@@ -85,10 +94,15 @@ func _process(delta: float) -> void:
 		var sloppy_finish := player.is_grounded_any() and speed <= sloppy_max_speed and vertical_speed <= sloppy_max_vertical_speed
 		var crashed_in_goal := player.has_crashed() and speed <= sloppy_max_speed
 
-		if currently_inside and speed <= instant_finish_max_speed:
+		if finish_contact and speed <= instant_finish_max_speed:
 			_hold_timer = maxf(_hold_timer, sloppy_hold_time)
 			current_state = State.ARMED
 			_complete_goal(not player.has_crashed())
+		elif finish_contact and speed <= instant_finish_max_speed * 1.65:
+			_hold_timer += delta
+			current_state = State.ARMED
+			if _hold_timer >= sloppy_hold_time:
+				_complete_goal(not player.has_crashed())
 		elif upright and settled and slow_enough and not player.has_crashed():
 			_hold_timer += delta
 			current_state = State.ARMED
@@ -111,6 +125,7 @@ func _process(delta: float) -> void:
 		_hold_timer = maxf(_hold_timer - delta * 2.0, 0.0)
 		current_state = State.WAITING
 	_update_goal_feedback()
+	_store_player_positions()
 
 func _on_body_entered(body: Node2D) -> void:
 	if player == null:
@@ -165,6 +180,58 @@ func _is_player_inside_goal() -> bool:
 func _is_world_position_inside(world_position: Vector2) -> bool:
 	var local := to_local(world_position)
 	return absf(local.x) <= half_width and absf(local.y) <= half_height
+
+func _did_player_sweep_through_goal() -> bool:
+	if player == null or player.body == null:
+		return false
+	if _last_body_position == Vector2.INF:
+		return false
+
+	if _segment_hits_goal(_last_body_position, player.body.global_position):
+		return true
+	if _segment_hits_goal(_last_left_foot_position, player.left_foot.global_position):
+		return true
+	if _segment_hits_goal(_last_right_foot_position, player.right_foot.global_position):
+		return true
+	if player.head_contact != null and _segment_hits_goal(_last_head_position, player.head_contact.global_position):
+		return true
+
+	return false
+
+func _segment_hits_goal(from_world: Vector2, to_world: Vector2) -> bool:
+	if from_world == Vector2.INF or to_world == Vector2.INF:
+		return false
+
+	var from_local := to_local(from_world)
+	var to_local_position := to_local(to_world)
+	var min_x := -half_width - sweep_extra_width
+	var max_x := half_width + sweep_extra_width
+	var min_y := -half_height - sweep_extra_height
+	var max_y := half_height + sweep_extra_height
+
+	if _point_inside_rect(from_local, min_x, max_x, min_y, max_y):
+		return true
+	if _point_inside_rect(to_local_position, min_x, max_x, min_y, max_y):
+		return true
+
+	var steps := 5
+	for i in range(1, steps):
+		var t := float(i) / float(steps)
+		var p := from_local.lerp(to_local_position, t)
+		if _point_inside_rect(p, min_x, max_x, min_y, max_y):
+			return true
+	return false
+
+func _point_inside_rect(local_position: Vector2, min_x: float, max_x: float, min_y: float, max_y: float) -> bool:
+	return local_position.x >= min_x and local_position.x <= max_x and local_position.y >= min_y and local_position.y <= max_y
+
+func _store_player_positions() -> void:
+	if player == null or player.body == null:
+		return
+	_last_body_position = player.body.global_position
+	_last_left_foot_position = player.left_foot.global_position
+	_last_right_foot_position = player.right_foot.global_position
+	_last_head_position = player.head_contact.global_position if player.head_contact != null else Vector2.INF
 
 func _update_goal_feedback() -> void:
 	var progress := 0.0

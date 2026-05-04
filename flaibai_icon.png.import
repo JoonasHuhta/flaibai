@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dlaq27uufaoi3"
-valid=false
+uid="uid://cos06rqk8aqi5"
+path="res://.godot/imported/flaibai_icon.png-740b692dd711ae586f8d71126fbfaf78.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://flaibai_icon.png"
+dest_files=["res://.godot/imported/flaibai_icon.png-740b692dd711ae586f8d71126fbfaf78.ctex"]
 
 [params]
 

@@ -9,6 +9,7 @@ export/
 build/
 bin/
 *.apk
+*.idsig
 *.aab
 *.exe
 *.zip

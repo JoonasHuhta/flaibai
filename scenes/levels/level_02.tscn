@@ -1,13 +1,12 @@
-[gd_scene format=3 uid="uid://c7w5flaibailevel02"]
+[gd_scene format=3 uid="uid://bkhqb8vjcu8bd"]
 
 [ext_resource type="Script" uid="uid://fiq6p1g26syf" path="res://scripts/player/player_tuning.gd" id="4_tuning"]
 [ext_resource type="Script" uid="uid://bg66qs02iuaf1" path="res://scripts/core/camera_follow_2d.gd" id="5_camera"]
 [ext_resource type="Script" uid="uid://dm0h2uchlsaog" path="res://scripts/core/game_manager.gd" id="6_game"]
 [ext_resource type="Script" uid="uid://mneirhejbpr3" path="res://scripts/level/goal_zone.gd" id="7_goal"]
-[ext_resource type="PackedScene" path="res://scenes/player/player_rig.tscn" id="8_player_rig"]
-[ext_resource type="Script" path="res://scripts/ui/offscreen_indicator.gd" id="9_offscreen"]
-[ext_resource type="Script" path="res://scripts/ui/scoreboard_ui.gd" id="10_scoreboard"]
-
+[ext_resource type="PackedScene" uid="uid://bw3wur34tdwle" path="res://scenes/player/player_rig.tscn" id="8_player_rig"]
+[ext_resource type="Script" uid="uid://dgp8kup404fjt" path="res://scripts/ui/offscreen_indicator.gd" id="9_offscreen"]
+[ext_resource type="Script" uid="uid://c0imgg17rjyer" path="res://scripts/ui/scoreboard_ui.gd" id="10_scoreboard"]
 
 [sub_resource type="RectangleShape2D" id="GroundShape"]
 size = Vector2(620, 40)
@@ -20,29 +19,9 @@ size = Vector2(30, 220)
 
 [sub_resource type="Resource" id="PlayerTuning_arcade"]
 script = ExtResource("4_tuning")
-auto_launch_impulse = Vector2(520, -860)
-air_torque = 19500.0
-balance_torque = 6800.0
-max_angular_velocity = 20.5
-input_balance_relief = 0.03
-bounce_impulse = Vector2(260, -260)
-tilt_bounce_impulse = 650.0
-bounce_takeoff_speed = 980.0
-max_bounce_takeoff_speed = 1280.0
-upright_limit_degrees = 58.0
-min_bounce_impact_speed = 85.0
-bounce_cooldown = 0.12
-spring_visual_compression_time = 0.16
-crash_min_impact_speed = 80.0
-goal_upright_limit_degrees = 34.0
-goal_max_vertical_speed = 220.0
-goal_hold_time = 0.45
 
 [sub_resource type="RectangleShape2D" id="GoalShape"]
 size = Vector2(120, 180)
-
-
-
 
 [node name="Level02" type="Node2D" unique_id=1169460522]
 
@@ -56,18 +35,18 @@ controls_hint_path = NodePath("../RetryLayer/ControlsHint")
 result_label_path = NodePath("../RetryLayer/ResultLabel")
 retry_catcher_path = NodePath("../RetryLayer/RetryCatcher")
 
-[node name="RetryLayer" type="CanvasLayer" parent="."]
+[node name="RetryLayer" type="CanvasLayer" parent="." unique_id=929274248]
 
-
-[node name="RetryCatcher" type="Control" parent="RetryLayer"]
+[node name="RetryCatcher" type="Control" parent="RetryLayer" unique_id=1614932089]
 visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="TapToRetry" type="Label" parent="RetryLayer"]
+[node name="TapToRetry" type="Label" parent="RetryLayer" unique_id=130332568]
 visible = false
 offset_left = 42.0
 offset_top = 660.0
@@ -78,7 +57,7 @@ text = "Next Level"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LandingFeedback" type="Label" parent="RetryLayer"]
+[node name="LandingFeedback" type="Label" parent="RetryLayer" unique_id=763135505]
 visible = false
 offset_left = 42.0
 offset_top = 110.0
@@ -89,15 +68,17 @@ text = "Clean landing"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ScoreLabel" type="Label" parent="RetryLayer"]
+[node name="ScoreLabel" type="Label" parent="RetryLayer" unique_id=1556406953]
 offset_left = 16.0
 offset_top = 18.0
 offset_right = 184.0
 offset_bottom = 96.0
 theme_override_font_sizes/font_size = 18
-text = "Time 00.00\nBest --.--\nClean x0"
+text = "Time 00.00
+Best --.--
+Clean x0"
 
-[node name="FlowLabel" type="Label" parent="RetryLayer"]
+[node name="FlowLabel" type="Label" parent="RetryLayer" unique_id=801828801]
 offset_left = 230.0
 offset_top = 18.0
 offset_right = 374.0
@@ -106,7 +87,7 @@ theme_override_font_sizes/font_size = 18
 text = "Flow 0%"
 horizontal_alignment = 2
 
-[node name="ResultLabel" type="Label" parent="RetryLayer"]
+[node name="ResultLabel" type="Label" parent="RetryLayer" unique_id=725403567]
 visible = false
 offset_left = 30.0
 offset_top = 200.0
@@ -118,17 +99,18 @@ text = "LEVEL COMPLETE!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ControlsHint" type="Label" parent="RetryLayer"]
+[node name="ControlsHint" type="Label" parent="RetryLayer" unique_id=827760836]
 offset_left = 28.0
 offset_top = 760.0
 offset_right = 362.0
 offset_bottom = 828.0
 theme_override_font_sizes/font_size = 17
-text = "Tap to bounce\nHold left / right to tilt"
+text = "Tap to bounce
+Hold left / right to tilt"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LevelLabel" type="Label" parent="RetryLayer"]
+[node name="LevelLabel" type="Label" parent="RetryLayer" unique_id=1969572560]
 offset_left = 28.0
 offset_top = 18.0
 offset_right = 362.0
@@ -139,7 +121,7 @@ text = "LEVEL 2 - Long Hop"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="OffscreenIndicator" type="Control" parent="RetryLayer"]
+[node name="OffscreenIndicator" type="Control" parent="RetryLayer" unique_id=386896794]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -150,7 +132,7 @@ mouse_filter = 2
 script = ExtResource("9_offscreen")
 target_path = NodePath("../../Flaibai/Body")
 
-[node name="ScoreboardUI" type="Control" parent="RetryLayer"]
+[node name="ScoreboardUI" type="Control" parent="RetryLayer" unique_id=2033898047]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -158,39 +140,39 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 script = ExtResource("10_scoreboard")
 
-[node name="SkyPanel" type="Polygon2D" parent="."]
+[node name="SkyPanel" type="Polygon2D" parent="." unique_id=495567847]
 z_index = -30
+scale = Vector2(1, 1.5439012)
 color = Color(0.33, 0.55, 0.78, 1)
 polygon = PackedVector2Array(-600, -300, 7000, -300, 7000, 900, -600, 900)
 
-[node name="Sun" type="Polygon2D" parent="."]
+[node name="Sun" type="Polygon2D" parent="." unique_id=912093927]
 z_index = -25
 position = Vector2(310, 170)
 color = Color(1, 0.82, 0.28, 0.8)
 polygon = PackedVector2Array(0, -42, 24, -32, 39, -12, 39, 13, 24, 33, 0, 42, -24, 33, -39, 13, -39, -12, -24, -32)
 
-[node name="Cloud1" type="Polygon2D" parent="."]
+[node name="Cloud1" type="Polygon2D" parent="." unique_id=1287618238]
 z_index = -24
 position = Vector2(760, 230)
 color = Color(1, 1, 1, 0.35)
 polygon = PackedVector2Array(-70, 16, -48, -10, -20, -14, -4, -36, 34, -28, 50, -8, 76, 0, 70, 20, -70, 20)
 
-[node name="Cloud2" type="Polygon2D" parent="."]
+[node name="Cloud2" type="Polygon2D" parent="." unique_id=766395095]
 z_index = -24
 position = Vector2(2050, 190)
 color = Color(1, 1, 1, 0.28)
 polygon = PackedVector2Array(-88, 14, -58, -14, -25, -10, -7, -34, 32, -31, 57, -8, 91, -2, 82, 18, -88, 18)
 
-[node name="Cloud3" type="Polygon2D" parent="."]
+[node name="Cloud3" type="Polygon2D" parent="." unique_id=1764968004]
 z_index = -24
 position = Vector2(3520, 240)
 color = Color(1, 1, 1, 0.3)
 polygon = PackedVector2Array(-78, 15, -52, -10, -22, -13, -5, -32, 31, -24, 52, -6, 78, 1, 68, 19, -78, 19)
 
-[node name="Cloud4" type="Polygon2D" parent="."]
+[node name="Cloud4" type="Polygon2D" parent="." unique_id=1741255357]
 z_index = -24
 position = Vector2(5200, 210)
 color = Color(1, 1, 1, 0.26)
@@ -199,9 +181,9 @@ polygon = PackedVector2Array(-96, 14, -64, -16, -28, -12, -9, -36, 35, -30, 62, 
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=1807260169]
 position = Vector2(190, 641)
 
-[node name="StartBrand" type="Label" parent="."]
-z_index = -10
+[node name="StartBrand" type="Label" parent="." unique_id=743549731]
 modulate = Color(1, 0.89, 0.4, 0.18)
+z_index = -10
 offset_left = -18.0
 offset_top = 260.0
 offset_right = 480.0
@@ -224,6 +206,7 @@ polygon = PackedVector2Array(-310, -20, 310, -20, 310, 20, -310, 20)
 [node name="Platform1" type="StaticBody2D" parent="." unique_id=1834820322 groups=["ground"]]
 position = Vector2(840, 640)
 rotation = -0.18
+scale = Vector2(1.5509522, 0.98974854)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1" unique_id=68212111]
 shape = SubResource("PlatformShape")
@@ -264,136 +247,136 @@ shape = SubResource("PlatformShape")
 color = Color(0.25, 0.62, 0.32, 1)
 polygon = PackedVector2Array(-115, -10, -94, -19, -70, -10, -44, -20, -12, -9, 18, -19, 48, -9, 76, -18, 115, -10, 115, 14, -115, 14)
 
-[node name="Platform4" type="StaticBody2D" parent="." groups=["ground", "ice"]]
+[node name="Platform4" type="StaticBody2D" parent="." unique_id=1705547969 groups=["ground", "ice"]]
 position = Vector2(1870, 590)
 rotation = 0.12
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform4"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform4" unique_id=203466155]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform4"]
+[node name="Visual" type="Polygon2D" parent="Platform4" unique_id=1129070229]
 color = Color(0.62, 0.9, 1, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="Platform5" type="StaticBody2D" parent="." groups=["ground"]]
+[node name="Platform5" type="StaticBody2D" parent="." unique_id=350051379 groups=["ground"]]
 position = Vector2(2180, 675)
 rotation = -0.1
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform5"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform5" unique_id=1239231525]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform5"]
+[node name="Visual" type="Polygon2D" parent="Platform5" unique_id=513536824]
 color = Color(0.34, 0.76, 0.4, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="Platform6" type="StaticBody2D" parent="." groups=["ground"]]
+[node name="Platform6" type="StaticBody2D" parent="." unique_id=891647518 groups=["ground"]]
 position = Vector2(2520, 600)
 rotation = 0.08
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform6"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform6" unique_id=609249406]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform6"]
+[node name="Visual" type="Polygon2D" parent="Platform6" unique_id=1070599016]
 color = Color(0.34, 0.76, 0.4, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="Platform7" type="StaticBody2D" parent="." groups=["ground"]]
+[node name="Platform7" type="StaticBody2D" parent="." unique_id=2068782134 groups=["ground"]]
 position = Vector2(2920, 640)
 rotation = -0.16
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform7"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform7" unique_id=2057393720]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform7"]
+[node name="Visual" type="Polygon2D" parent="Platform7" unique_id=1903200120]
 color = Color(0.34, 0.76, 0.4, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="Platform8" type="StaticBody2D" parent="." groups=["ground", "ice"]]
+[node name="Platform8" type="StaticBody2D" parent="." unique_id=2056417681 groups=["ground", "ice"]]
 position = Vector2(3330, 560)
 rotation = 0.2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform8"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform8" unique_id=762746280]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform8"]
+[node name="Visual" type="Polygon2D" parent="Platform8" unique_id=1810384769]
 color = Color(0.62, 0.9, 1, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="Platform9" type="StaticBody2D" parent="." groups=["ground"]]
+[node name="Platform9" type="StaticBody2D" parent="." unique_id=211653530 groups=["ground"]]
 position = Vector2(3720, 690)
 rotation = -0.22
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform9"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform9" unique_id=148959865]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform9"]
+[node name="Visual" type="Polygon2D" parent="Platform9" unique_id=1225112698]
 color = Color(0.34, 0.76, 0.4, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="Platform10" type="StaticBody2D" parent="." groups=["ground"]]
+[node name="Platform10" type="StaticBody2D" parent="." unique_id=2074137342 groups=["ground"]]
 position = Vector2(4140, 600)
 rotation = 0.05
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform10"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform10" unique_id=2122880802]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform10"]
+[node name="Visual" type="Polygon2D" parent="Platform10" unique_id=1731634555]
 color = Color(0.34, 0.76, 0.4, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="Platform11" type="StaticBody2D" parent="." groups=["ground", "mushroom"]]
+[node name="Platform11" type="StaticBody2D" parent="." unique_id=1511271255 groups=["ground", "mushroom"]]
 position = Vector2(4580, 610)
 rotation = -0.08
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform11"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform11" unique_id=1937801088]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform11"]
+[node name="Visual" type="Polygon2D" parent="Platform11" unique_id=544067821]
 color = Color(1, 0.32, 0.34, 1)
 polygon = PackedVector2Array(-115, -8, -92, -28, -40, -34, 0, -26, 40, -34, 92, -28, 115, -8, 105, 14, -105, 14)
 
-[node name="Platform12" type="StaticBody2D" parent="." groups=["ground"]]
+[node name="Platform12" type="StaticBody2D" parent="." unique_id=961883067 groups=["ground"]]
 position = Vector2(5000, 500)
 rotation = 0.14
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform12"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform12" unique_id=3500763]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform12"]
+[node name="Visual" type="Polygon2D" parent="Platform12" unique_id=1788030758]
 color = Color(0.34, 0.76, 0.4, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="Platform13" type="StaticBody2D" parent="." groups=["ground", "moss"]]
+[node name="Platform13" type="StaticBody2D" parent="." unique_id=824276702 groups=["ground", "moss"]]
 position = Vector2(5430, 660)
 rotation = -0.18
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform13"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform13" unique_id=1240177975]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform13"]
+[node name="Visual" type="Polygon2D" parent="Platform13" unique_id=1783273283]
 color = Color(0.25, 0.62, 0.32, 1)
 polygon = PackedVector2Array(-115, -10, -94, -19, -70, -10, -44, -20, -12, -9, 18, -19, 48, -9, 76, -18, 115, -10, 115, 14, -115, 14)
 
-[node name="Platform14" type="StaticBody2D" parent="." groups=["ground", "ice"]]
+[node name="Platform14" type="StaticBody2D" parent="." unique_id=233828663 groups=["ground", "ice"]]
 position = Vector2(5850, 590)
 rotation = 0.12
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform14"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform14" unique_id=1299686620]
 shape = SubResource("PlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="Platform14"]
+[node name="Visual" type="Polygon2D" parent="Platform14" unique_id=1048986433]
 color = Color(0.62, 0.9, 1, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
-[node name="FinalPlatform" type="StaticBody2D" parent="." groups=["ground"]]
+[node name="FinalPlatform" type="StaticBody2D" parent="." unique_id=1746657413 groups=["ground"]]
 position = Vector2(6280, 668)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="FinalPlatform"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FinalPlatform" unique_id=1187837688]
+scale = Vector2(1.6, 1)
 shape = SubResource("PlatformShape")
-scale = Vector2(1.6, 1.0)
 
-[node name="Visual" type="Polygon2D" parent="FinalPlatform"]
-color = Color(1.0, 0.82, 0.1, 1)
+[node name="Visual" type="Polygon2D" parent="FinalPlatform" unique_id=1488690660]
+color = Color(1, 0.82, 0.1, 1)
 polygon = PackedVector2Array(-185, -14, 185, -14, 185, 14, -185, 14)
 
 [node name="GoalZone" type="Area2D" parent="." unique_id=1091897052]
@@ -403,49 +386,48 @@ tuning = SubResource("PlayerTuning_arcade")
 half_width = 165.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone" unique_id=1090072342]
+scale = Vector2(1.45, 1)
 shape = SubResource("GoalShape")
-scale = Vector2(1.45, 1.0)
-debug_color = Color(0.2, 1.0, 0.4, 0.25)
+debug_color = Color(0.2, 1, 0.4, 0.25)
 
-[node name="GlowZone" type="Polygon2D" parent="GoalZone"]
-color = Color(0.2, 1.0, 0.45, 0.12)
+[node name="GlowZone" type="Polygon2D" parent="GoalZone" unique_id=1795960928]
+color = Color(0.2, 1, 0.45, 0.12)
 polygon = PackedVector2Array(-120, -90, 120, -90, 120, 90, -120, 90)
 
-[node name="LandingPad" type="Polygon2D" parent="GoalZone"]
-color = Color(1.0, 0.85, 0.1, 0.9)
+[node name="LandingPad" type="Polygon2D" parent="GoalZone" unique_id=1633566325]
+color = Color(1, 0.85, 0.1, 0.9)
 polygon = PackedVector2Array(-130, 72, 130, 72, 142, 90, -142, 90)
 
-[node name="PadStripe" type="Polygon2D" parent="GoalZone"]
+[node name="PadStripe" type="Polygon2D" parent="GoalZone" unique_id=1013235191]
 color = Color(0.08, 0.08, 0.12, 0.6)
 polygon = PackedVector2Array(-130, 72, 130, 72, 130, 82, -130, 82)
 
-[node name="ProgressFill" type="Polygon2D" parent="GoalZone"]
+[node name="ProgressFill" type="Polygon2D" parent="GoalZone" unique_id=1134932905]
 visible = false
 position = Vector2(-130, 72)
-color = Color(0.2, 1.0, 0.45, 0.75)
+color = Color(0.2, 1, 0.45, 0.75)
 polygon = PackedVector2Array(0, 0, 260, 0, 260, 10, 0, 10)
 
-[node name="Pole" type="Polygon2D" parent="GoalZone"]
+[node name="Pole" type="Polygon2D" parent="GoalZone" unique_id=78100643]
 color = Color(0.85, 0.88, 0.92, 1)
 polygon = PackedVector2Array(-5, -130, 5, -130, 5, 80, -5, 80)
 
-[node name="FlagGold" type="Polygon2D" parent="GoalZone"]
-color = Color(1.0, 0.82, 0.1, 1)
+[node name="FlagGold" type="Polygon2D" parent="GoalZone" unique_id=1142450413]
+color = Color(1, 0.82, 0.1, 1)
 polygon = PackedVector2Array(5, -130, 58, -115, 58, -98, 5, -113)
 
 [node name="FlagDark" type="Polygon2D" parent="GoalZone" unique_id=1906654010]
 color = Color(0.08, 0.08, 0.14, 1)
 polygon = PackedVector2Array(5, -113, 58, -98, 58, -81, 5, -96)
 
-[node name="Flaibai" parent="." instance=ExtResource("8_player_rig")]
+[node name="Flaibai" parent="." unique_id=982077491 instance=ExtResource("8_player_rig")]
 tuning = SubResource("PlayerTuning_arcade")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1083425965]
 position = Vector2(195, 330)
+zoom = Vector2(0.7, 0.7)
 script = ExtResource("5_camera")
 target_path = NodePath("../Flaibai/Body")
 max_x = 6480.0
 min_y = 260.0
 max_y = 620.0
-
-
