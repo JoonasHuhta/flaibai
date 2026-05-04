@@ -1,63 +1,53 @@
 # Flaibai — Projektin Nykytila & Käsikirja (Handover / Codex)
 
-Tämä dokumentti on tarkoitettu AI-agenteille (kuten Codex) projektin nykytilanteen nopeaan sisäistämiseen. Se kuvaa arkkitehtuurin, ydinmekaniikat, fysiikan säännöt ja tunnetun teknisen velan.
+Tämä dokumentti on tarkoitettu AI-agenteille (kuten Codex) ja kehittäjille projektin nykytilanteen nopeaan sisäistämiseen. Se kuvaa arkkitehtuurin, ydinmekaniikat, uuden tallennusjärjestelmän ja tulevaisuuden suuntaviivat.
 
-## 1. Yleiskatsaus
-**Flaibai** on fysiikkapohjainen arcade-tasohyppely mobiililaitteille (portrait-tila). Pelaaja ohjaa vieterikenkäistä hahmoa napauttamalla ja kallistamalla sitä ilmassa. Tavoitteena on päästä maaliin kaatumatta ja laskeutua puhtaasti. Peli nojaa raskaasti "game feeliin" (kameran tärinä, haptinen palaute, fysiikan paino).
+**Päivitetty:** Scoreboard-järjestelmän, Start Screen -uudistusten ja hitbox-viilausten jälkeen.
 
-## 2. Tiedostorakenne ja Arkkitehtuuri
+## 1. Yleiskatsaus & Ydinmekaniikat
+**Flaibai** on fysiikkapohjainen arcade-tasohyppely mobiililaitteille (portrait-tila). Pelaaja ohjaa vieterikenkäistä hahmoa (RigidBody2D) napauttamalla ja kallistamalla sitä ilmassa vasemmalta ja oikealta puolelta ruutua. 
+*   **Tavoite:** Päästä maaliin (GoalZone) kaatumatta ja laskeutua jaloilleen riittävän pitkäksi aikaa (0.45s) pystyssä.
+*   **Game Feel:** Peli nojaa raskaasti painavaan fysiikkaan, kameratärinään ja haptiseen palautteeseen. Hahmon hitboxeja on hiljattain hieman pienennetty armollisemman pelituntuman saavuttamiseksi.
+
+## 2. Arkkitehtuuri & Tiedostorakenne
 
 ### Autoloads (Singletonit)
-*   **`ProjectState` (`scripts/core/project_state.gd`)**: Pitää kirjaa nykyisestä kenttäindeksistä. Määrittää kenttäjärjestyksen (`level_scenes` array).
-*   **`AudioManager` (`scripts/core/audio_manager.gd`)**: Käsittelee musiikin ja SFX:n. Null-safe (jos `.ogg` tai `.wav` tiedosto puuttuu, se ohitetaan hiljaa).
+Näitä tulee kutsua dynaamisesti `get_tree().root.get_node_or_null("Nimi")` avulla, ei `Engine.get_singleton()`:
+*   **`ProjectState`**: Hallitsee kenttälistaa, etenemistä (unlocks) ja pitää kirjaa parhaista ajoista (Top 10 per kenttä). Hoitaa tallennuksen ja latauksen polkuun `user://flaibai_records.cfg`.
+*   **`AudioManager`**: Käsittelee musiikin ja SFX:n dynaamisesti (`.ogg`, `.wav`).
 
 ### Keskeiset Scenet
-*   **`scenes/start_screen.tscn`**: Aloitusruutu. Käynnistää pelimusiikin ja odottaa napautusta.
-*   **`scenes/levels/level_01.tscn`**: Ensimmäinen (helppo) kenttä. Toimii tutoriaalina.
-*   **`scenes/prototyyppi.tscn`**: Kenttä 2 (vaikea). Sisältää kaikki erikoispinnat. Toimii toistaiseksi toisena kenttänä.
+*   **`scenes/start_screen.tscn`**: "Juicy" aloitusruutu (leijuva hahmo, parallax-tausta). Sisältää nykyään **kenttävalikon**, josta näkee lukitut kentät ja parhaat ajat.
+*   **`scenes/levels/level_01.tscn`**: Tutoriaalikenttä.
+*   **`scenes/prototyyppi.tscn`**: Vaikeampi testi/leikkikenttä (jää, sammal, sienet).
 
-### ⚠️ Kriittinen Tekninen Velka (TÄRKEÄÄ!)
-Tällä hetkellä **pelaajahahmo (`Flaibai` Node2D), kamera, UI (`RetryLayer`) ja `GameManager` ovat kopioituna suoraan jokaiseen kenttä-sceneen** (`level_01.tscn` ja `prototyyppi.tscn`).
-*   **Miksi?** Prototyyppivaiheessa kaikki oli yhdessä tiedostossa.
-*   **Seuraava iso arkkitehtuurimuutos:** Nämä on erotettava. Tarvitaan `Game.tscn` (joka sisältää GameManagerin, UI:n, Kameran ja Pelaaja-instanssin), joka lataa sisäänsä dynaamisesti vain kentän geometrian (`level_01.tscn`, jne.).
-
-## 3. Pelaajan Fysiikka ja Ohjaus (`PlayerController2D`)
-
-Hahmo on `RigidBody2D`. Fysiikkaa säädetään `PlayerTuning` resursseilla.
-
-*   **Laukaisu (Tap-to-launch):** Kun hahmo on maassa odottamassa, mikä tahansa napautus (tap) laukaisee sen ilmaan automaattisella impulssilla (`auto_launch_impulse`). Hahmo tekee idle-heiluntaa odottaessaan.
-*   **Ilmaohjaus:** Kun hahmo on ilmassa, pelaaja pitää sormea ruudun vasemmalla tai oikealla puoliskolla antaakseen vääntöä (`air_torque`) ja pyörittääkseen hahmoa.
-*   **Pomppiminen:** Hahmo pomppaa automaattisesti laskeutuessaan. Pompun voima riippuu `bounce_takeoff_speed` arvosta ja tulokulmasta.
-*   **Crash (Kuolema):**
-    *   Liian kova isku huonossa kulmassa (`crash_min_impact_speed`).
-    *   **Kyljelleen makaaminen:** Jos hahmo on maassa ja kallistunut yli 72 astetta yli 0.38 sekunnin ajan (sisältää grace periodin pompun jälkeen).
+## 3. Uudet Järjestelmät (Elastomania-henkinen Scoreboard)
+Peliin on lisätty lokaali ennätysjärjestelmä:
+*   Jokaisesta kentästä tallennetaan 10 parasta aikaa. 
+*   Kun pelaaja läpäisee kentän (GoalZone hyväksyy laskeutumisen), `GameManager` pysäyttää ajan ja kutsuu `ProjectState.record_level_time()`.
+*   Ruudulle aukeaa **`ScoreboardUI`**, joka näyttää Top 10 -listan, pelaajan oman ajan ja ilmoittaa "NEW RECORD!" jos aika oli ykkönen.
+*   Scoreboardista löytyy napit "RETRY" (lataa uudelleen) ja "NEXT LEVEL" (avaa ja lataa seuraavan kentän).
 
 ## 4. Kenttäelementit ja Pinnat
+Kaikki pinnat ovat `StaticBody2D` nodeja, joilla on jokin näistä `groups`-tageista:
+*   `ground`: Normaali pomppu.
+*   `mushroom`: Voimakas korkea pomppu.
+*   `moss`: Vaimentaa liike-energian nollaan (hahmo pysähtyy, vaatii uuden lähdön).
+*   `ice`: Poistaa vaakasuuntaisen kitkan (liukuu loputtomiin).
 
-Kaikki pinnat ovat `StaticBody2D` nodeja, joiden toiminta määritellään `groups`-tageilla (esim. `["ground", "mushroom"]`).
+## 5. ⚠️ Kriittinen Tekninen Velka (SEURAAVA ISO TEHTÄVÄ)
+Tällä hetkellä **pelaajahahmo, kamera, UI ja GameManager ovat kopioituna suoraan jokaiseen kenttä-sceneen**. 
+Tämä tarkoittaa, että jos haluamme muuttaa GameManagerin koodia tai UI:n asettelua, se on päivitettävä jokaiseen `.tscn` tiedostoon erikseen.
 
-| Ryhmä (Group) | Toiminta (`player_controller.gd: _handle_bounce()`) |
-| :--- | :--- |
-| `ground` | Normaali pomppu. Kaikilla pinnoilla on oltava tämä ryhmä. |
-| `mushroom` | Antaa merkittävästi isomman pystysuuntaisen impulssin. |
-| `moss` | Sammal. Vaimentaa kaiken liike-energian nollaan. Hahmo pysähtyy ja jää odottamaan uutta tap-to-launchia. |
-| `ice` | Jää. Poistaa vaakasuuntaisen kitkan, hahmo liukuu eteenpäin. |
+**Arkkitehtuurimuutos (Kenttä-Pipeline):**
+Ennen uusien kenttien massatuotantoa meidän on erotettava nämä:
+1.  Tehdään master-scene nimeltä `Game.tscn` (tai Core.tscn).
+2.  Tämä scene sisältää `GameManagerin`, Pelaaja-instanssin, Kameran ja UI-layerin.
+3.  Varsinaiset kentät (`level_01.tscn` jne.) sisältävät **vain maaston, maalin ja spawn-pisteen tiedot**.
+4.  `Game.tscn` lataa sisäänsä pyydetyn maasto-scenen, siirtää pelaajan spawn-pisteeseen ja aloittaa pelin.
+Tämä tekee uusien kenttien tekemisestä äärimmäisen helppoa ja nopeaa!
 
-### GoalZone (`scripts/level/goal_zone.gd`)
-Maalialue vaatii tarkkaa laskeutumista.
-1.  Pelaajan on oltava `is_grounded_any()` (vähintään yksi jalka maassa, GoalZonen alla on FinalPlatform).
-2.  Kulma pystysuorassa (< 34 astetta) ja pystynopeus pieni (< 220).
-3.  Pelaajan on pysyttävä tässä tilassa `goal_hold_time` (0.45s) ajan.
-4.  Laukaisee `player.celebrate()` (iloinen tuplahyppy) ja 0.9s myöhemmin GameManager näyttää "LEVEL COMPLETE!" UI:n.
-
-## 5. UI ja Audio
-
-*   **GameManager:** Käsittelee Flow-mittarin (kasvaa volteista ja puhtaista alastuloista), pisteet, ja näyttää lopussa tulosruudun. "Next Level" nappi kutsuu `ProjectState.advance_level()`.
-*   **Audio:** Kts. `audio/AUDIO_BRIEF.md`. Käytössä `.ogg` tai `.wav`. Jos tiedosto on kansiossa, `AudioManager` soittaa sen automaattisesti. Esimerkiksi `bounce.ogg`, `crash.ogg`, `game_theme.ogg`.
-
-## 6. Lähitulevaisuuden Kehityskohteet (TODO)
-
-1.  **Arkkitehtuurin Refaktorointi:** Rakenna modulaarinen `Game.tscn` + `LevelLoader` järjestelmä, jotta uusien kenttien tekeminen ei vaadi koko pelaajan ja UI:n kopioimista.
-2.  **Uusien kenttien suunnittelu:** Kun arkkitehtuuri on kunnossa, tarvitaan kenttiä 03-10, jotka opettavat pintoja (jää, sammal) yksitellen.
-3.  **Puuttuvat Äänet:** Etsi ja konvertoi loput `.ogg` tiedostot (esim. `launch.ogg`, `moss_stop.ogg`, `clean_streak.ogg`).
-4.  **Ghost Runner:** Lisää haamu edellisestä ennätyssuorituksesta parantamaan uudelleenpelattavuutta.
+## 6. Lähitulevaisuuden Suunnitelma
+1.  **Arkkitehtuurin siivous (kts. yllä):** Irrotetaan level-geometria core-pelaajasta.
+2.  **Kenttäsuunnittelu (Level Design):** Kun arkkitehtuuri on kunnossa, rakennetaan 10–20 lyhyttä ja tiivistä kenttää. Kenttien tulisi opettaa aina yksi mekaniikka (esim. pelkkä jää, pelkkä sammal, pelkkä takaperinvoltti) kerrallaan.
+3.  **Ghost Runner (Haamupelaaja):** Tallennettaisiin ennätysajon reitti (position + rotation history) ja toistettaisiin se visuaalisesti seuraavalla yrityksellä. Muiden AI-agenttien tulisi harkita tämän toteutusta myöhemmin.
