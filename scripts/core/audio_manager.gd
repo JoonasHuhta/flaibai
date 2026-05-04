@@ -107,7 +107,7 @@ func _load_sfx(name: String) -> AudioStream:
 		return _sfx_cache[name]
 	# Try common extensions in order
 	for ext in ["ogg", "wav", "mp3"]:
-		var path := SFX_DIR + name + "." + ext
+		var path: String = SFX_DIR + name + "." + ext
 		if ResourceLoader.exists(path):
 			var s: AudioStream = load(path)
 			_sfx_cache[name] = s
