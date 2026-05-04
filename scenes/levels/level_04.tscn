@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bkhqb8vjcu8bd"]
+[gd_scene format=3 uid="uid://cxx4krk5ppmfv"]
 
 [ext_resource type="Script" uid="uid://fiq6p1g26syf" path="res://scripts/player/player_tuning.gd" id="4_tuning"]
 [ext_resource type="Script" uid="uid://bg66qs02iuaf1" path="res://scripts/core/camera_follow_2d.gd" id="5_camera"]
