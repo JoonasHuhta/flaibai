@@ -305,8 +305,13 @@ func _is_tap_event(event: InputEvent) -> bool:
 	return false
 
 func _load_next_level() -> void:
-	ProjectState.advance_level()
-	get_tree().change_scene_to_file(ProjectState.get_current_scene())
+	var state = Engine.get_singleton("ProjectState") if Engine.has_singleton("ProjectState") else null
+	if state != null:
+		state.advance_level()
+		get_tree().change_scene_to_file(state.get_current_scene())
+	else:
+		# Fallback: reload current scene
+		get_tree().reload_current_scene()
 
 func _on_retry_catcher_gui_input(event: InputEvent) -> void:
 	if not _is_tap_event(event):

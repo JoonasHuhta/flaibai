@@ -23,9 +23,9 @@ ProjectState="*res://scripts/core/project_state.gd"
 
 window/size/viewport_width=390
 window/size/viewport_height=844
-window/handheld/orientation=1
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=1
 
 [physics]
 

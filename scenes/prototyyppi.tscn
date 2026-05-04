@@ -355,6 +355,16 @@ shape = SubResource("PlatformShape")
 color = Color(0.62, 0.9, 1, 1)
 polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
 
+[node name="FinalPlatform" type="StaticBody2D" parent="." groups=["ground"]]
+position = Vector2(6280, 668)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FinalPlatform"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="FinalPlatform"]
+color = Color(1.0, 0.82, 0.1, 1)
+polygon = PackedVector2Array(-115, -14, 115, -14, 115, 14, -115, 14)
+
 [node name="GoalZone" type="Area2D" parent="." unique_id=1091897052]
 position = Vector2(6280, 535)
 script = ExtResource("7_goal")

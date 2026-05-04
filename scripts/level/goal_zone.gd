@@ -43,17 +43,22 @@ func _process(delta: float) -> void:
 		current_state = State.WAITING
 		return
 
-	if player.is_clean_landing(tuning.goal_upright_limit_degrees, tuning.goal_max_vertical_speed):
-		_hold_timer += delta
-		current_state = State.ARMED
-
-		if _hold_timer >= tuning.goal_hold_time:
-			current_state = State.COMPLETE
-			player.celebrate()
-			# Small delay so the joy-jump animation plays before UI appears
-			get_tree().create_timer(0.9).timeout.connect(func():
-				game_manager.complete_level()
-			)
+	if player.is_grounded_any() and not player.has_crashed():
+		var angle := absf(rad_to_deg(wrapf(player.body.rotation, -PI, PI)))
+		var upright := angle <= tuning.goal_upright_limit_degrees
+		var settled := absf(player.body.linear_velocity.y) <= tuning.goal_max_vertical_speed
+		if upright and settled:
+			_hold_timer += delta
+			current_state = State.ARMED
+			if _hold_timer >= tuning.goal_hold_time:
+				current_state = State.COMPLETE
+				player.celebrate()
+				get_tree().create_timer(0.9).timeout.connect(func():
+					game_manager.complete_level()
+				)
+		else:
+			_hold_timer = 0.0
+			current_state = State.WAITING
 	else:
 		_hold_timer = 0.0
 		current_state = State.WAITING
