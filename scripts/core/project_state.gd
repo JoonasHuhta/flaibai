@@ -2,19 +2,29 @@ extends Node
 
 const SAVE_PATH := "user://flaibai_records.cfg"
 
+const LEVEL_CATALOG: Array[Dictionary] = [
+	{
+		"scene": "res://scenes/levels/level_01.tscn",
+		"name": "First Steps",
+		"concept": "Basic bounce, first mushroom, wide finish",
+	},
+	{
+		"scene": "res://scenes/levels/level_02.tscn",
+		"name": "Long Hop",
+		"concept": "Longer air control and forgiving recovery",
+	},
+	{
+		"scene": "res://scenes/levels/level_03.tscn",
+		"name": "Flow Ridge",
+		"concept": "Mixed surfaces and rhythm",
+	},
+]
+
 var current_level_index: int = 0
 
-var level_scenes: Array[String] = [
-	"res://scenes/levels/level_01.tscn",
-	"res://scenes/levels/level_02.tscn",
-	"res://scenes/levels/level_03.tscn",
-]
-
-var level_names: Array[String] = [
-	"First Steps",
-	"Long Hop",
-	"Flow Ridge",
-]
+var level_scenes: Array[String] = []
+var level_names: Array[String] = []
+var level_concepts: Array[String] = []
 
 var unlocked_level_count: int = 1
 var best_times: Array[float] = []
@@ -22,11 +32,15 @@ var best_clean_streaks: Array[int] = []
 var top_times: Array = []
 
 func _ready() -> void:
+	_sync_level_catalog()
 	_ensure_record_arrays()
 	load_records()
 
 func get_current_scene() -> String:
 	return level_scenes[current_level_index]
+
+func get_level_count() -> int:
+	return level_scenes.size()
 
 func advance_level() -> void:
 	unlock_level(current_level_index + 1)
@@ -131,6 +145,11 @@ func get_level_name(index: int) -> String:
 		return level_names[index]
 	return "Level %d" % (index + 1)
 
+func get_level_concept(index: int) -> String:
+	if index >= 0 and index < level_concepts.size():
+		return level_concepts[index]
+	return ""
+
 func format_time(seconds: float) -> String:
 	if seconds < 0.0:
 		return "--.--"
@@ -192,6 +211,8 @@ func save_records() -> void:
 		push_warning("Could not save Flaibai records.")
 
 func _ensure_record_arrays() -> void:
+	if level_scenes.is_empty():
+		_sync_level_catalog()
 	while best_times.size() < level_scenes.size():
 		best_times.append(-1.0)
 	while best_clean_streaks.size() < level_scenes.size():
@@ -204,3 +225,16 @@ func _ensure_record_arrays() -> void:
 		best_clean_streaks.resize(level_scenes.size())
 	if top_times.size() > level_scenes.size():
 		top_times.resize(level_scenes.size())
+
+func _sync_level_catalog() -> void:
+	level_scenes.clear()
+	level_names.clear()
+	level_concepts.clear()
+	for raw_entry in LEVEL_CATALOG:
+		var entry: Dictionary = raw_entry
+		var scene_path: String = str(entry.get("scene", ""))
+		if scene_path.is_empty():
+			continue
+		level_scenes.append(scene_path)
+		level_names.append(str(entry.get("name", "Level %d" % level_scenes.size())))
+		level_concepts.append(str(entry.get("concept", "")))

@@ -35,10 +35,18 @@ Timing rules:
 - Each level keeps a local top 10 time list.
 - Do not write saves under `res://`; Android builds cannot rely on writing there.
 
+Catalog rules:
+
+- Add new playable levels to `ProjectState.LEVEL_CATALOG`.
+- Keep the order stable because saved times are indexed by level order.
+- Every catalog entry should include `scene`, `name`, and `concept`.
+- `level_scenes` and `level_names` are generated from the catalog for older code paths.
+
 Before building, run:
 
 ```powershell
 & 'C:\Users\jvker\AppData\Local\Temp\AweZip\Temp1\AweZip2\Godot_v4.6.2-stable_win64.exe' --headless --path . --script tools\check_level_players.gd
+& 'C:\Users\jvker\AppData\Local\Temp\AweZip\Temp1\AweZip2\Godot_v4.6.2-stable_win64.exe' --headless --path . --script tools\check_level_catalog.gd
 ```
 
 Next architecture step:
