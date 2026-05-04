@@ -30,6 +30,7 @@ class_name PlayerVisuals2D
 @export var spring_height: float = 34.0
 @export var spring_width: float = 18.0
 @export var spring_coils: int = 4
+@export var shoe_visual_gap: float = 4.0
 
 @onready var player: PlayerController2D = get_node_or_null(player_path)
 @onready var body: RigidBody2D = get_node(body_path)
@@ -69,6 +70,8 @@ func _process(_delta: float) -> void:
 	var angular_skew := clampf(body.angular_velocity / 14.0, -0.28, 0.28) if body != null else 0.0
 	var left_shoe_position := _get_shoe_position(left_foot, _compressed_spring_height(spring_compression + angular_skew))
 	var right_shoe_position := _get_shoe_position(right_foot, _compressed_spring_height(spring_compression - angular_skew))
+	left_shoe_position += Vector2(-shoe_visual_gap, 0.0).rotated(body.rotation)
+	right_shoe_position += Vector2(shoe_visual_gap, 0.0).rotated(body.rotation)
 
 	global_position = body.global_position
 	rotation = body.rotation
