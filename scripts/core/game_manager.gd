@@ -41,7 +41,7 @@ const SAVE_PATH := "user://flaibai_records.cfg"
 
 func _ready() -> void:
 	call_deferred("_initialize")
-	var am = Engine.get_singleton("AudioManager") if Engine.has_singleton("AudioManager") else null
+	var am = get_tree().root.get_node_or_null("AudioManager")
 	if am != null:
 		am.play_music("game_theme.ogg")
 
@@ -192,7 +192,7 @@ func complete_level() -> void:
 	if result_label != null:
 		result_label.text = "LEVEL COMPLETE!\n\n%s\n%s\n%s\n%s" % [time_line, best_line, clean_line, score_line]
 		result_label.visible = true
-	var am = Engine.get_singleton("AudioManager") if Engine.has_singleton("AudioManager") else null
+	var am = get_tree().root.get_node_or_null("AudioManager")
 	if am != null:
 		am.play_sfx("level_complete")
 		am.stop_music()
@@ -231,7 +231,7 @@ func _on_player_bounced(angle_degrees: float, flip_count: int) -> void:
 		flow_gain = 24.0 * flip_count
 	elif clean:
 		feedback_label.text = "Clean x%d" % clean_streak
-		var am = Engine.get_singleton("AudioManager") if Engine.has_singleton("AudioManager") else null
+		var am = get_tree().root.get_node_or_null("AudioManager")
 		if am != null:
 			am.play_sfx("clean_streak", 1.0 + (clean_streak - 1) * 0.04)
 		bonus = 60
@@ -315,7 +315,7 @@ func _is_tap_event(event: InputEvent) -> bool:
 	return false
 
 func _load_next_level() -> void:
-	var state = Engine.get_singleton("ProjectState") if Engine.has_singleton("ProjectState") else null
+	var state = get_tree().root.get_node_or_null("ProjectState")
 	if state != null:
 		state.advance_level()
 		get_tree().change_scene_to_file(state.get_current_scene())

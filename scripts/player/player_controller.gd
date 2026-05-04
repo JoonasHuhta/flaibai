@@ -480,7 +480,7 @@ func _is_body_near_ground() -> bool:
 	return body.global_position.distance_to(_last_spawn_position) < 110.0
 
 func _play_sfx(name: String, pitch: float = 1.0) -> void:
-	var am = Engine.get_singleton("AudioManager") if Engine.has_singleton("AudioManager") else null
+	var am = get_tree().root.get_node_or_null("AudioManager")
 	if am != null:
 		am.play_sfx(name, pitch)
 

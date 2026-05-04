@@ -10,8 +10,9 @@ var _title_tween: Tween = null
 
 func _ready() -> void:
 	# Start music on title screen
-	if Engine.has_singleton("AudioManager"):
-		Engine.get_singleton("AudioManager").play_music("title_theme.ogg")
+	var am = get_tree().root.get_node_or_null("AudioManager")
+	if am != null:
+		am.play_music("title_theme.ogg")
 	# Small delay before accepting taps (avoids accidental skip)
 	await get_tree().create_timer(0.6).timeout
 	_tap_enabled = true
@@ -37,9 +38,10 @@ func _on_tap() -> void:
 	if not _tap_enabled:
 		return
 	_tap_enabled = false
-	if Engine.has_singleton("AudioManager"):
-		Engine.get_singleton("AudioManager").play_sfx("ui_tap")
-		Engine.get_singleton("AudioManager").stop_music()
+	var am = get_tree().root.get_node_or_null("AudioManager")
+	if am != null:
+		am.play_sfx("ui_tap")
+		am.stop_music()
 	# Flash + scale effect before loading
 	var tap_label := get_node_or_null("TapLabel")
 	if tap_label:
@@ -52,8 +54,9 @@ func _on_tap() -> void:
 		tw2.tween_property(title, "scale", Vector2(1.0, 1.0), 0.1)
 	await get_tree().create_timer(0.25).timeout
 	# Reset level progress to start from level 1
-	if Engine.has_singleton("ProjectState"):
-		Engine.get_singleton("ProjectState").reset()
+	var ps = get_tree().root.get_node_or_null("ProjectState")
+	if ps != null:
+		ps.reset()
 	get_tree().change_scene_to_file(level_to_load)
 
 func _start_tap_pulse() -> void:
