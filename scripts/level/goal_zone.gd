@@ -10,18 +10,18 @@ enum State {
 @export var player_path: NodePath
 @export var game_manager_path: NodePath
 @export var tuning: PlayerTuning
-@export var half_width: float = 95.0
-@export var half_height: float = 150.0
-@export var contact_grace_time: float = 0.18
+@export var half_width: float = 190.0
+@export var half_height: float = 180.0
+@export var contact_grace_time: float = 0.28
 @export var clean_hold_time: float = 0.08
 @export var sloppy_hold_time: float = 0.04
 @export var crash_hold_time: float = 0.04
-@export var finish_delay: float = 0.18
-@export var instant_finish_max_speed: float = 1180.0
+@export var finish_delay: float = 0.12
+@export var instant_finish_max_speed: float = 2600.0
 @export var sloppy_max_speed: float = 760.0
 @export var sloppy_max_vertical_speed: float = 560.0
-@export var sweep_extra_width: float = 140.0
-@export var sweep_extra_height: float = 90.0
+@export var sweep_extra_width: float = 220.0
+@export var sweep_extra_height: float = 160.0
 @export var progress_path: NodePath = ^"ProgressFill"
 @export var glow_path: NodePath = ^"GlowZone"
 @export var landing_pad_path: NodePath = ^"LandingPad"
@@ -74,6 +74,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if current_state == State.COMPLETE or _completion_started:
 		_update_goal_feedback()
+		_store_player_positions()
 		return
 
 	if player == null or game_manager == null:
@@ -99,47 +100,21 @@ func _process(delta: float) -> void:
 		_hold_timer = maxf(_hold_timer - delta * 2.0, 0.0)
 		current_state = State.WAITING
 		_update_goal_feedback()
+		_store_player_positions()
 		return
 
-	if not player.is_waiting_for_tap():
-		var angle := absf(rad_to_deg(wrapf(player.body.rotation, -PI, PI)))
-		var speed := player.body.linear_velocity.length()
-		var vertical_speed := absf(player.body.linear_velocity.y)
-		var upright := angle <= tuning.goal_upright_limit_degrees + 8.0
-		var settled := vertical_speed <= tuning.goal_max_vertical_speed + 80.0
-		var slow_enough := player.body.linear_velocity.length() <= 520.0
-		var sloppy_finish := player.is_grounded_any() and speed <= sloppy_max_speed and vertical_speed <= sloppy_max_vertical_speed
-		var crashed_in_goal := player.has_crashed() and speed <= sloppy_max_speed
-
-		if finish_contact and speed <= instant_finish_max_speed:
-			_hold_timer = maxf(_hold_timer, sloppy_hold_time)
-			current_state = State.ARMED
+	var speed := player.body.linear_velocity.length()
+	if finish_contact and speed <= instant_finish_max_speed:
+		_hold_timer = tuning.goal_hold_time
+		current_state = State.ARMED
+		_complete_goal(not player.has_crashed())
+	elif finish_contact:
+		_hold_timer += delta
+		current_state = State.ARMED
+		if _hold_timer >= sloppy_hold_time:
 			_complete_goal(not player.has_crashed())
-		elif finish_contact and speed <= instant_finish_max_speed * 1.65:
-			_hold_timer += delta
-			current_state = State.ARMED
-			if _hold_timer >= sloppy_hold_time:
-				_complete_goal(not player.has_crashed())
-		elif upright and settled and slow_enough and not player.has_crashed():
-			_hold_timer += delta
-			current_state = State.ARMED
-			if _hold_timer >= minf(tuning.goal_hold_time, clean_hold_time):
-				_complete_goal()
-		elif crashed_in_goal:
-			_hold_timer += delta
-			current_state = State.ARMED
-			if _hold_timer >= crash_hold_time:
-				_complete_goal(false)
-		elif sloppy_finish:
-			_hold_timer += delta
-			current_state = State.ARMED
-			if _hold_timer >= sloppy_hold_time:
-				_complete_goal()
-		else:
-			_hold_timer = maxf(_hold_timer - delta * 1.5, 0.0)
-			current_state = State.WAITING
 	else:
-		_hold_timer = maxf(_hold_timer - delta * 2.0, 0.0)
+		_hold_timer = maxf(_hold_timer - delta * 1.5, 0.0)
 		current_state = State.WAITING
 	_update_goal_feedback()
 	_store_player_positions()
