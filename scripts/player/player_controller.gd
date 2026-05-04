@@ -173,6 +173,7 @@ func try_foot_bounce(impact_speed: float, ground_body: Node = null) -> void:
 	_body_crash_grace_remaining = 0.12
 	Input.vibrate_handheld(25)
 	request_camera_shake.emit(1.5, 0.12)
+	_play_sfx("bounce" if surface == "normal" else "bounce_" + surface)
 	_air_rotation_total = 0.0
 	bounced.emit(angle, flip_count)
 	if surface != "normal":
@@ -215,6 +216,7 @@ func fail() -> void:
 	_crash_shown_retry = false
 	Input.vibrate_handheld(80)
 	request_camera_shake.emit(4.0, 0.25)
+	_play_sfx("crash")
 	crashed.emit()
 
 func celebrate() -> void:
@@ -282,6 +284,7 @@ func _auto_launch() -> void:
 	body.apply_central_impulse(tuning.auto_launch_impulse)
 	_air_rotation_total = 0.0
 	_bounce_cooldown_remaining = tuning.bounce_cooldown
+	_play_sfx("launch")
 
 # --- Air control ---
 
@@ -375,6 +378,7 @@ func _absorb_landing(impact_speed: float) -> void:
 	_spring_visual_timer = tuning.spring_visual_compression_time * 1.4
 	_bounce_cooldown_remaining = tuning.bounce_cooldown * 2.4
 	_body_crash_grace_remaining = 0.1
+	_play_sfx("moss_stop")
 	_waiting_for_tap = true
 
 func _get_surface_type(ground_body: Node) -> String:
@@ -474,6 +478,11 @@ func _is_body_near_ground() -> bool:
 	if absf(body.linear_velocity.y) > 80.0:
 		return false
 	return body.global_position.distance_to(_last_spawn_position) < 110.0
+
+func _play_sfx(name: String, pitch: float = 1.0) -> void:
+	var am = Engine.get_singleton("AudioManager") if Engine.has_singleton("AudioManager") else null
+	if am != null:
+		am.play_sfx(name, pitch)
 
 func _is_near_start_area() -> bool:
 	if body == null:

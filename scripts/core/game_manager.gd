@@ -41,6 +41,9 @@ const SAVE_PATH := "user://flaibai_records.cfg"
 
 func _ready() -> void:
 	call_deferred("_initialize")
+	var am = Engine.get_singleton("AudioManager") if Engine.has_singleton("AudioManager") else null
+	if am != null:
+		am.play_music("game_theme.ogg")
 
 func _initialize() -> void:
 	player = _resolve_player()
@@ -189,6 +192,10 @@ func complete_level() -> void:
 	if result_label != null:
 		result_label.text = "LEVEL COMPLETE!\n\n%s\n%s\n%s\n%s" % [time_line, best_line, clean_line, score_line]
 		result_label.visible = true
+	var am = Engine.get_singleton("AudioManager") if Engine.has_singleton("AudioManager") else null
+	if am != null:
+		am.play_sfx("level_complete")
+		am.stop_music()
 	if feedback_label != null:
 		feedback_label.text = "🎉 Great run!"
 		feedback_label.visible = true
@@ -224,6 +231,9 @@ func _on_player_bounced(angle_degrees: float, flip_count: int) -> void:
 		flow_gain = 24.0 * flip_count
 	elif clean:
 		feedback_label.text = "Clean x%d" % clean_streak
+		var am = Engine.get_singleton("AudioManager") if Engine.has_singleton("AudioManager") else null
+		if am != null:
+			am.play_sfx("clean_streak", 1.0 + (clean_streak - 1) * 0.04)
 		bonus = 60
 		flow_gain = 20.0
 	elif angle_degrees <= 32.0:
